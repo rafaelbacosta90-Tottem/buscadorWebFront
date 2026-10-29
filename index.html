@@ -14,9 +14,7 @@
   <div id="tela-login" class="min-h-screen bg-slate-900 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 border border-slate-100">
       <div class="text-center mb-8">
-        <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 font-bold text-xl shadow-lg">
-          PNCP
-        </div>
+        <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 font-bold text-xl shadow-lg">PNCP</div>
         <h2 class="text-2xl font-bold text-slate-900">Acesse o Hub Licitações</h2>
       </div>
 
@@ -25,32 +23,24 @@
       <form id="form-login" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail</label>
-          <input type="email" id="email" required  class="w-full px-4 py-2.5 bg-slate-50 border rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <input type="email" id="email" required  class="w-full px-4 py-2.5 bg-slate-50 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
-          <input type="password" id="password" required class="w-full px-4 py-2.5 bg-slate-50 border rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <input type="password" id="password" required class="w-full px-4 py-2.5 bg-slate-50 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
         </div>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-sm transition-all shadow-md">
-          Entrar no Sistema
-        </button>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-sm shadow-md">Entrar no Sistema</button>
       </form>
     </div>
   </div>
 
-  <!-- DASHBOARD PRINCIPAL -->
+  <!-- DASHBOARD -->
   <div id="tela-dashboard" class="hidden flex-col min-h-screen">
     <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="bg-blue-600 p-2 rounded-lg font-bold text-lg">PNCP</div>
-          <span class="font-semibold text-lg tracking-wide">Hub Licitações</span>
-        </div>
+        <div class="flex items-center space-x-3"><div class="bg-blue-600 p-2 rounded-lg font-bold text-lg">PNCP</div><span class="font-semibold text-lg">Hub Licitações</span></div>
         <div class="flex items-center space-x-4">
-          <div class="text-right">
-            <span id="user-empresa" class="text-xs font-bold text-amber-400 block">--</span>
-            <span id="user-nome" class="text-[10px] text-slate-400 block">--</span>
-          </div>
+          <div class="text-right"><span id="user-empresa" class="text-xs font-bold text-amber-400 block">--</span><span id="user-nome" class="text-[10px] text-slate-400 block">--</span></div>
           <a id="link-admin" href="admin.html" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold px-3 py-1.5 rounded-lg border border-slate-700">Painel Admin</a>
           <button id="btn-logout" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs border border-slate-700">Sair</button>
         </div>
@@ -58,25 +48,20 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-6 py-6 space-y-6 flex-1 w-full">
-      <!-- PAINEL DE FILTROS AVANÇADOS -->
+      <!-- FILTROS AVANÇADOS -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="md:col-span-3">
             <div class="flex items-center justify-between mb-1">
               <label class="block text-xs font-bold text-slate-600 uppercase">Produto/Serviço (Termo de busca):</label>
-              <button onclick="abrirModalPalavrasChave()" class="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
-                <i data-lucide="key" class="w-3.5 h-3.5"></i> Minhas Palavras-Chave
-              </button>
+              <button onclick="abrirModalPalavrasChave()" class="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1"><i data-lucide="key" class="w-3.5 h-3.5"></i> Minhas Palavras-Chave</button>
             </div>
-            <input type="text" id="input-termo" placeholder="Digite o termo ou selecione nas suas palavras cadastradas" class="w-full px-3.5 py-2 bg-slate-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="text" id="input-termo" placeholder="Digite o termo ou selecione nas suas palavras cadastradas" class="w-full px-3.5 py-2 bg-slate-50 border rounded-lg text-sm focus:outline-none">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Onde buscar o termo:</label>
-            <select id="select-onde-buscar" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
-              <option value="todos">Todos (Item e Objeto)</option>
-              <option value="item">Apenas no Item</option>
-              <option value="objeto">Apenas no Objeto</option>
+            <select id="select-onde-buscar" class="w-full bg-slate-50 border border-slate-200 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="todos">Todos (Item e Objeto)</option><option value="item">Apenas no Item</option><option value="objeto">Apenas no Objeto</option>
             </select>
           </div>
         </div>
@@ -84,10 +69,8 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar Data Por:</label>
-            <select id="select-tipo-data" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
-              <option value="publicacao">Data de Publicação</option>
-              <option value="abertura">Data de Abertura</option>
-              <option value="encerramento">Data de Encerramento</option>
+            <select id="select-tipo-data" class="w-full bg-slate-50 border border-slate-200 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="publicacao">Data de Publicação</option><option value="abertura">Data de Abertura</option><option value="encerramento">Data de Encerramento</option>
             </select>
           </div>
           <div class="md:col-span-2">
@@ -100,10 +83,8 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Status do Edital:</label>
-            <select id="select-status-edital" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
-              <option value="todos">Todos</option>
-              <option value="encerradas">Encerradas</option>
-              <option value="recebendo">A Receber/Recebendo Proposta</option>
+            <select id="select-status-edital" class="w-full bg-slate-50 border border-slate-200 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="todos">Todos</option><option value="encerradas">Encerradas</option><option value="recebendo">Recebendo Proposta</option>
             </select>
           </div>
         </div>
@@ -111,182 +92,92 @@
         <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Portais de Compra:</label>
-            <button onclick="toggleModalPortais()" class="w-full bg-blue-50 border border-blue-200 text-blue-700 py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-between">
-              <span id="label-portais-selecionados">Qualquer Portal (Todos)</span>
-              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            <button onclick="toggleModalPortais()" class="w-full bg-blue-50 border border-blue-200 text-blue-700 py-2 px-3 rounded-lg text-sm font-bold flex justify-between">
+              <span id="label-portais-selecionados">Qualquer Portal (Todos)</span><i data-lucide="chevron-down" class="w-4 h-4"></i>
             </button>
           </div>
-
           <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Categoria do Processo:</label>
-            <select id="select-categoria" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
-              <option value="Todas">Todas</option>
-              <option value="Cessão">Cessão</option>
-              <option value="Compras">Compras</option>
-              <option value="Informática (TIC)">Informática (TIC)</option>
-              <option value="Internacional">Internacional</option>
-              <option value="Locação Imóveis">Locação Imóveis</option>
-              <option value="Mão de Obra">Mão de Obra</option>
-              <option value="Obras">Obras</option>
-              <option value="Serviços">Serviços</option>
-              <option value="Serviços de Engenharia">Serviços de Engenharia</option>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Categoria:</label>
+            <select id="select-categoria" class="w-full bg-slate-50 border border-slate-200 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="Todas">Todas</option><option value="Compras">Compras</option><option value="Serviços">Serviços</option><option value="Obras">Obras</option>
             </select>
           </div>
-
           <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Exibir Valor:</label>
             <select id="select-exibir-valor" onchange="renderizarTabela()" class="w-full bg-slate-50 border border-blue-200 text-blue-900 font-bold py-2 px-2.5 rounded-lg text-sm">
-              <option value="total_item">Valor Total do Item</option>
-              <option value="unitario_item">Valor Unitário do Item</option>
-              <option value="total_edital">Valor Total da Compra</option>
+              <option value="total_item">Valor Total do Item</option><option value="unitario_item">Valor Unitário do Item</option><option value="total_edital">Total da Compra</option>
             </select>
           </div>
-
           <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Modalidade Contratação:</label>
-            <select id="select-modalidade" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
-              <option value="">Todas (Principais)</option>
-              <option value="8">Dispensa com Disputa</option>
-              <option value="6">Pregão Eletrônico</option>
-              <option value="4">Concorrência Eletrônica</option>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Modalidade:</label>
+            <select id="select-modalidade" class="w-full bg-slate-50 border border-slate-200 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="">Todas (Principais)</option><option value="8">Dispensa com Disputa</option><option value="6">Pregão Eletrônico</option><option value="4">Concorrência</option>
             </select>
           </div>
-
           <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estado (UF) do Órgão:</label>
-            <select id="select-uf" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
-              <option value="Todas">Todas UFs</option>
-              <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estado (UF):</label>
+            <select id="select-uf" class="w-full bg-slate-50 border border-slate-200 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="Todas">Todas UFs</option><option value="SP">SP</option><option value="MG">MG</option><option value="GO">GO</option><option value="DF">DF</option><option value="PR">PR</option><option value="RS">RS</option><option value="RJ">RJ</option><option value="SC">SC</option>
             </select>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2 border-t border-slate-100">
-          <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nº Edital (Ex: 10/2026):</label>
-            <input type="text" id="input-edital" placeholder="Número do edital" class="w-full px-3.5 py-2 bg-slate-50 border rounded-lg text-sm focus:outline-none">
-          </div>
-          <div class="md:col-span-2">
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">UASG / CNPJ do Órgão:</label>
-            <input type="text" id="input-uasg" placeholder="Código UASG ou CNPJ do Órgão" class="w-full px-3.5 py-2 bg-slate-50 border rounded-lg text-sm focus:outline-none">
-          </div>
-          <div class="flex items-end">
-            <button id="btn-pesquisar" onclick="buscarLicitacoes(1)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm shadow-md flex items-center justify-center gap-2">
-              <i data-lucide="search" class="w-4 h-4"></i> Pesquisar
-            </button>
-          </div>
+          <div><label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nº Edital (Ex: 10/2026):</label><input type="text" id="input-edital" placeholder="Número do edital" class="w-full px-3.5 py-2 bg-slate-50 border rounded-lg text-sm"></div>
+          <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-600 uppercase mb-1">UASG / CNPJ do Órgão:</label><input type="text" id="input-uasg" placeholder="Código UASG ou CNPJ do Órgão" class="w-full px-3.5 py-2 bg-slate-50 border rounded-lg text-sm"></div>
+          <div class="flex items-end"><button onclick="buscarLicitacoes(1)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm shadow flex items-center justify-center gap-2"><i data-lucide="search" class="w-4 h-4"></i> Pesquisar</button></div>
         </div>
       </div>
 
       <!-- TABELA DE RESULTADOS -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-        <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <span class="text-xs font-bold uppercase text-slate-500">Resultados</span>
-          <span id="label-total" class="text-xs font-bold text-blue-600">0 itens</span>
-        </div>
+      <div class="bg-white rounded-2xl border shadow overflow-hidden flex flex-col">
+        <div class="p-4 bg-slate-50 border-b flex items-center justify-between"><span class="text-xs font-bold uppercase text-slate-500">Resultados</span><span id="label-total" class="text-xs font-bold text-blue-600">0 itens</span></div>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm border-collapse">
-            <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-xs">
-              <tr>
-                <th class="py-3 px-4 w-10"></th>
-                <th class="py-3 px-4">Órgão / UF</th>
-                <th class="py-3 px-4">Edital / Modalidade</th>
-                <th class="py-3 px-4">Descrição do Item</th>
-                <th class="py-3 px-4 text-center">Qtd</th>
-                <th class="py-3 px-4">Datas (Pub / Abert / Enc)</th>
-                <th class="py-3 px-4 text-right">Valor Estimado</th>
-                <th class="py-3 px-4 text-center">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="tabela-corpo" class="divide-y divide-slate-100 text-slate-700">
-              <tr><td colSpan="8" class="py-12 text-center text-slate-400">Clique em Pesquisar para carregar registros.</td></tr>
-            </tbody>
+            <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-xs"><tr><th class="py-3 px-4 w-10"></th><th class="py-3 px-4">Órgão / UF</th><th class="py-3 px-4">Edital / Modalidade</th><th class="py-3 px-4">Descrição do Item</th><th class="py-3 px-4 text-center">Qtd</th><th class="py-3 px-4">Datas (Pub / Abert / Enc)</th><th class="py-3 px-4 text-right">Valor Estimado</th><th class="py-3 px-4 text-center">Ações</th></tr></thead>
+            <tbody id="tabela-corpo" class="divide-y divide-slate-100 text-slate-700"><tr><td colSpan="8" class="py-12 text-center text-slate-400">Clique em Pesquisar para carregar registros.</td></tr></tbody>
           </table>
         </div>
-        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-          <span id="info-paginacao" class="text-xs font-medium text-slate-500">Página 1 de 1</span>
-          <div class="flex gap-2">
-            <button id="btn-anterior" disabled class="px-3 py-1.5 bg-white border text-xs font-bold rounded-lg disabled:opacity-50">← Anterior</button>
-            <button id="btn-proximo" disabled class="px-3 py-1.5 bg-white border text-xs font-bold rounded-lg disabled:opacity-50">Próximo →</button>
-          </div>
-        </div>
+        <div class="p-4 border-t bg-slate-50 flex items-center justify-between"><span id="info-paginacao" class="text-xs font-medium text-slate-500">Página 1 de 1</span><div class="flex gap-2"><button id="btn-anterior" disabled class="px-3 py-1.5 bg-white border text-xs font-bold rounded-lg disabled:opacity-50">← Anterior</button><button id="btn-proximo" disabled class="px-3 py-1.5 bg-white border text-xs font-bold rounded-lg disabled:opacity-50">Próximo →</button></div></div>
       </div>
     </main>
   </div>
 
-  <!-- MODAIS (Palavras Chave, Portais, Anexos, IA) -->
-  <div id="modal-palavras-chave" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200">
-      <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-        <button onclick="pesquisarTodasPalavrasSalvas()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow flex items-center gap-1">
-          <i data-lucide="search" class="w-3.5 h-3.5"></i> Usar Todas de Uma Vez
-        </button>
-        <button onclick="document.getElementById('modal-palavras-chave').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">Fechar</button>
-      </div>
-
-      <div class="p-4 border-b border-slate-100 bg-slate-50 flex gap-2">
-        <input type="text" id="input-nova-palavra" placeholder="Digite uma nova palavra ou termo..." class="flex-1 px-3 py-2 bg-white border rounded-lg text-xs focus:outline-none">
-        <button onclick="adicionarPalavraChave()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Adicionar</button>
-      </div>
-
-      <div id="lista-palavras-corpo" class="p-4 max-h-[50vh] overflow-y-auto space-y-2">
-        <p class="text-xs text-slate-400 text-center py-4">Carregando termos...</p>
-      </div>
+  <!-- MODAIS RESTAURADOS IGUAIS -->
+  <div id="modal-palavras-chave" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg overflow-hidden border">
+      <div class="p-4 bg-slate-50 border-b flex justify-between"><button onclick="pesquisarTodasPalavrasSalvas()" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs shadow flex items-center gap-1"><i data-lucide="search" class="w-3.5 h-3.5"></i> Usar Todas</button><button onclick="document.getElementById('modal-palavras-chave').classList.add('hidden')" class="px-4 py-2 bg-slate-200 font-bold rounded-lg text-xs">Fechar</button></div>
+      <div class="p-4 border-b flex gap-2"><input type="text" id="input-nova-palavra" placeholder="Digite uma nova palavra..." class="flex-1 px-3 py-2 border rounded-lg text-xs"><button onclick="adicionarPalavraChave()" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg text-xs shadow">Adicionar</button></div>
+      <div id="lista-palavras-corpo" class="p-4 max-h-[50vh] overflow-y-auto space-y-2"></div>
     </div>
   </div>
 
-  <div id="modal-portais" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
-      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
-        <h3 class="font-bold text-sm">Filtro de Portais</h3>
-        <button onclick="toggleModalPortais()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-        <label class="flex items-center gap-2 text-xs font-bold text-blue-700 cursor-pointer">
-          <input type="checkbox" id="chk-qualquer-portal" onchange="marcarTodosPortais()" checked class="rounded border-slate-300"> Qualquer Portal (Todos)
-        </label>
-        <span id="qtd-portais-carregados" class="text-[10px] text-slate-500 font-bold">...</span>
-      </div>
+  <div id="modal-portais" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden border">
+      <div class="p-4 bg-slate-900 text-white flex justify-between"><h3 class="font-bold text-sm">Filtro de Portais</h3><button onclick="toggleModalPortais()"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div class="p-4 border-b flex justify-between"><label class="flex items-center gap-2 text-xs font-bold text-blue-700 cursor-pointer"><input type="checkbox" id="chk-qualquer-portal" onchange="marcarTodosPortais()" checked class="rounded"> Qualquer Portal (Todos)</label><span id="qtd-portais-carregados" class="text-[10px] text-slate-500 font-bold">...</span></div>
       <div class="p-6 space-y-2.5 max-h-[60vh] overflow-y-auto" id="container-portais-checks"></div>
-      <div class="p-4 bg-slate-50 border-t border-slate-200 text-right">
-        <button onclick="toggleModalPortais()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Confirmar Filtro</button>
-      </div>
+      <div class="p-4 border-t text-right"><button onclick="toggleModalPortais()" class="px-5 py-2 bg-blue-600 text-white font-bold rounded-lg text-xs">Confirmar Filtro</button></div>
     </div>
   </div>
 
-  <div id="modal-anexos" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 flex flex-col">
-      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
-        <h3 class="font-bold text-sm flex items-center gap-2"><i data-lucide="folder-down" class="w-4 h-4 text-amber-400"></i> Documentos Oficiais</h3>
-        <button onclick="document.getElementById('modal-anexos').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
+  <div id="modal-anexos" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col">
+      <div class="p-4 bg-slate-900 text-white flex justify-between"><h3 class="font-bold text-sm">Documentos Oficiais</h3><button onclick="document.getElementById('modal-anexos').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button></div>
       <div id="lista-anexos-corpo" class="p-6 max-h-[60vh] overflow-y-auto space-y-3"></div>
-      <div class="p-4 border-t border-slate-100 bg-slate-50 text-right">
-        <button onclick="document.getElementById('modal-anexos').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">Fechar</button>
-      </div>
     </div>
   </div>
 
-  <div id="modal-analise-ia" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
-      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
-        <h3 class="font-bold text-sm flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i> Análise Inteligente</h3>
-        <button onclick="document.getElementById('modal-analise-ia').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
+  <div id="modal-analise-ia" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="p-4 bg-slate-900 text-white flex justify-between"><h3 class="font-bold text-sm">Análise Inteligente</h3><button onclick="document.getElementById('modal-analise-ia').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button></div>
       <div id="conteudo-ia-corpo" class="p-6 overflow-y-auto flex-1 font-mono text-xs leading-relaxed bg-slate-50"></div>
-      <div class="p-4 border-t border-slate-100 bg-white flex justify-end">
-        <button onclick="document.getElementById('modal-analise-ia').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">Fechar</button>
-      </div>
     </div>
   </div>
 
   <script>
     const API_URL = "https://buscador-web-6i6s.onrender.com";
-    let usuarioAtual = null;
-    let dadosLocais = [];
-    let listaPortaisGlobais = [];
-    let palavrasSalvas = [];
-    let paginaAtual = 1, totalPaginas = 1;
+    let usuarioAtual = null; let dadosLocais = []; let palavrasSalvas = []; let paginaAtual = 1, totalPaginas = 1;
 
     function formatarData(dtString) {
       if (!dtString) return '--';
@@ -316,8 +207,7 @@
     }
 
     async function abrirModalPalavrasChave() {
-      document.getElementById('modal-palavras-chave').classList.remove('hidden');
-      await carregarPalavrasChave();
+      document.getElementById('modal-palavras-chave').classList.remove('hidden'); await carregarPalavrasChave();
     }
 
     async function carregarPalavrasChave() {
@@ -326,11 +216,11 @@
         const res = await fetch(`${API_URL}/api/palavras-chave?user_id=${usuarioAtual.user_id}`);
         const data = await res.json();
         palavrasSalvas = data.palavras || [];
-        if (palavrasSalvas.length === 0) { corpo.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Nenhuma palavra-chave cadastrada.</p>`; return; }
+        if (palavrasSalvas.length === 0) { corpo.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Vazio.</p>`; return; }
         corpo.innerHTML = palavrasSalvas.map(p => `
-          <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2">
+          <div class="p-2.5 bg-slate-50 border rounded-xl flex items-center justify-between gap-2">
             <span class="text-xs font-semibold text-slate-800 cursor-pointer hover:text-blue-600 flex-1" onclick="usarPalavraChave('${p.termo}')">${p.termo}</span>
-            <button onclick="removerPalavraChave(${p.id})" class="p-1 text-slate-400 hover:text-red-500 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            <button onclick="removerPalavraChave(${p.id})" class="p-1 text-red-500 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
           </div>
         `).join('');
         lucide.createIcons();
@@ -345,17 +235,8 @@
       input.value = ''; await carregarPalavrasChave();
     }
 
-    async function removerPalavraChave(id) {
-      await fetch(`${API_URL}/api/palavras-chave/${id}`, { method: 'DELETE' });
-      await carregarPalavrasChave();
-    }
-
-    function usarPalavraChave(termo) {
-      document.getElementById('input-termo').value = termo;
-      document.getElementById('modal-palavras-chave').classList.add('hidden');
-      buscarLicitacoes(1);
-    }
-
+    async function removerPalavraChave(id) { await fetch(`${API_URL}/api/palavras-chave/${id}`, { method: 'DELETE' }); await carregarPalavrasChave(); }
+    function usarPalavraChave(termo) { document.getElementById('input-termo').value = termo; document.getElementById('modal-palavras-chave').classList.add('hidden'); buscarLicitacoes(1); }
     function toggleModalPortais() { document.getElementById('modal-portais').classList.toggle('hidden'); }
 
     async function carregarPortaisDoBanco() {
@@ -363,26 +244,17 @@
       try {
         const res = await fetch(`${API_URL}/api/licitacoes/portais`);
         const data = await res.json();
-        listaPortaisGlobais = data.portais || [];
-        document.getElementById('qtd-portais-carregados').textContent = `${listaPortaisGlobais.length} portais`;
-        container.innerHTML = listaPortaisGlobais.map(portal => `
-          <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer">
-            <input type="checkbox" value="${portal}" class="chk-portal rounded border-slate-300" onchange="atualizarTextoPortais()"> ${portal}
-          </label>
-        `).join('');
+        document.getElementById('qtd-portais-carregados').textContent = `${data.portais.length} portais`;
+        container.innerHTML = data.portais.map(p => `<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer"><input type="checkbox" value="${p}" class="chk-portal rounded border-slate-300" onchange="atualizarTextoPortais()"> ${p}</label>`).join('');
       } catch (e) {}
     }
 
-    function marcarTodosPortais() {
-      document.querySelectorAll('.chk-portal').forEach(cb => cb.checked = false);
-      atualizarTextoPortais();
-    }
-
+    function marcarTodosPortais() { document.querySelectorAll('.chk-portal').forEach(cb => cb.checked = false); atualizarTextoPortais(); }
     function atualizarTextoPortais() {
-      const selecionados = Array.from(document.querySelectorAll('.chk-portal:checked')).map(cb => cb.value);
+      const sels = Array.from(document.querySelectorAll('.chk-portal:checked')).map(cb => cb.value);
       const chkQualquer = document.getElementById('chk-qualquer-portal');
       const label = document.getElementById('label-portais-selecionados');
-      if (selecionados.length > 0) { chkQualquer.checked = false; label.textContent = `${selecionados.length} Portal(is)`; } 
+      if (sels.length > 0) { chkQualquer.checked = false; label.textContent = `${sels.length} Portal(is)`; } 
       else { chkQualquer.checked = true; label.textContent = "Qualquer Portal (Todos)"; }
     }
 
@@ -391,17 +263,12 @@
       if (sessaoSalva) {
         usuarioAtual = JSON.parse(sessaoSalva);
         document.getElementById('tela-login').classList.add('hidden');
-        document.getElementById('tela-dashboard').classList.remove('hidden');
-        document.getElementById('tela-dashboard').classList.add('flex');
-        document.getElementById('user-empresa').textContent = usuarioAtual.empresa;
-        document.getElementById('user-nome').textContent = usuarioAtual.usuario;
+        document.getElementById('tela-dashboard').classList.remove('hidden'); document.getElementById('tela-dashboard').classList.add('flex');
+        document.getElementById('user-empresa').textContent = usuarioAtual.empresa; document.getElementById('user-nome').textContent = usuarioAtual.usuario;
         if (usuarioAtual.is_admin) document.getElementById('link-admin').classList.remove('hidden');
-        carregarPortaisDoBanco();
-        await autoPreencherPalavrasChave();
-        buscarLicitacoes(1);
+        carregarPortaisDoBanco(); await autoPreencherPalavrasChave(); buscarLicitacoes(1);
       } else {
-        document.getElementById('tela-dashboard').classList.add('hidden');
-        document.getElementById('tela-login').classList.remove('hidden');
+        document.getElementById('tela-dashboard').classList.add('hidden'); document.getElementById('tela-login').classList.remove('hidden');
       }
     }
 
@@ -418,10 +285,7 @@
     document.getElementById('btn-logout').addEventListener('click', () => { localStorage.removeItem('usuario_sessao'); checarSessao(); });
 
     async function buscarLicitacoes(pagina = 1) {
-      paginaAtual = pagina;
-      const corpo = document.getElementById('tabela-corpo');
-      corpo.innerHTML = `<tr><td colSpan="8" class="py-12 text-center text-slate-400">Consultando base central...</td></tr>`;
-
+      paginaAtual = pagina; document.getElementById('tabela-corpo').innerHTML = `<tr><td colSpan="8" class="py-12 text-center text-slate-400">Consultando base central...</td></tr>`;
       const params = new URLSearchParams();
       if (document.getElementById('input-termo').value) params.append('termo', document.getElementById('input-termo').value);
       params.append('onde_buscar', document.getElementById('select-onde-buscar').value);
@@ -437,25 +301,20 @@
       
       const portaisSel = Array.from(document.querySelectorAll('.chk-portal:checked')).map(cb => cb.value);
       if (portaisSel.length > 0) params.append('portais', portaisSel.join(','));
-      params.append('pagina', paginaAtual);
-      params.append('limite', 50);
+      params.append('pagina', paginaAtual); params.append('limite', 50);
 
       try {
         const res = await fetch(`${API_URL}/api/licitacoes/pesquisar?${params}`);
-        const data = await res.json();
-        dadosLocais = data.dados || [];
+        const data = await res.json(); dadosLocais = data.dados || [];
         document.getElementById('label-total').textContent = `${(data.total_registros || 0).toLocaleString('pt-BR')} itens`;
-        totalPaginas = data.total_paginas || 1;
-        document.getElementById('info-paginacao').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
-        document.getElementById('btn-anterior').disabled = paginaAtual <= 1;
-        document.getElementById('btn-proximo').disabled = paginaAtual >= totalPaginas;
+        totalPaginas = data.total_paginas || 1; document.getElementById('info-paginacao').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+        document.getElementById('btn-anterior').disabled = paginaAtual <= 1; document.getElementById('btn-proximo').disabled = paginaAtual >= totalPaginas;
         renderizarTabela();
-      } catch (e) { corpo.innerHTML = `<tr><td colSpan="8" class="py-12 text-center text-red-500">Erro na consulta.</td></tr>`; }
+      } catch (e) { document.getElementById('tabela-corpo').innerHTML = `<tr><td colSpan="8" class="py-12 text-center text-red-500">Erro na consulta.</td></tr>`; }
     }
 
     function renderizarTabela() {
-      const corpo = document.getElementById('tabela-corpo');
-      const modoValor = document.getElementById('select-exibir-valor').value;
+      const corpo = document.getElementById('tabela-corpo'); const modoValor = document.getElementById('select-exibir-valor').value;
       if (dadosLocais.length === 0) { corpo.innerHTML = `<tr><td colSpan="8" class="py-12 text-center text-slate-400">Nenhum edital encontrado.</td></tr>`; return; }
 
       corpo.innerHTML = dadosLocais.map((item, index) => {
@@ -489,12 +348,12 @@
     }
 
     async function abrirModalAnexos(cnpj, ano, seq) {
-      document.getElementById('modal-anexos').classList.remove('hidden'); document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-slate-400 text-center">Buscando documentos no PNCP...</p>`;
+      document.getElementById('modal-anexos').classList.remove('hidden'); document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-slate-400 text-center">Buscando documentos...</p>`;
       try {
         const res = await fetch(`${API_URL}/api/licitacoes/arquivos?cnpj=${cnpj}&ano=${ano}&sequencial=${seq}`);
         const data = await res.json();
-        if (!data.arquivos || data.arquivos.length === 0) { document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-slate-500 text-center py-6">Nenhum documento anexado no PNCP.</p>`; return; }
-        document.getElementById('lista-anexos-corpo').innerHTML = data.arquivos.map(arq => `<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3"><div><span class="text-xs font-medium text-slate-800">${arq.titulo || 'Documento'}</span></div><a href="${arq.url}" target="_blank" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs">Baixar</a></div>`).join('');
+        if (!data.arquivos || data.arquivos.length === 0) { document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-slate-500 text-center py-6">Nenhum documento anexado.</p>`; return; }
+        document.getElementById('lista-anexos-corpo').innerHTML = data.arquivos.map(arq => `<div class="p-3 bg-slate-50 border rounded-xl flex items-center justify-between gap-3"><div><span class="text-xs font-medium text-slate-800">${arq.titulo || 'Documento'}</span></div><a href="${arq.url}" target="_blank" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs">Baixar</a></div>`).join('');
       } catch (e) {}
     }
 
