@@ -153,11 +153,32 @@
   </div>
 
   <div id="modal-portais" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden border">
-      <div class="p-4 bg-slate-900 text-white flex justify-between"><h3 class="font-bold text-sm">Filtro de Portais</h3><button onclick="toggleModalPortais()"><i data-lucide="x" class="w-5 h-5"></i></button></div>
-      <div class="p-4 border-b flex justify-between"><label class="flex items-center gap-2 text-xs font-bold text-blue-700 cursor-pointer"><input type="checkbox" id="chk-qualquer-portal" onchange="marcarTodosPortais()" checked class="rounded"> Qualquer Portal (Todos)</label><span id="qtd-portais-carregados" class="text-[10px] text-slate-500 font-bold">...</span></div>
-      <div class="p-6 space-y-2.5 max-h-[60vh] overflow-y-auto" id="container-portais-checks"></div>
-      <div class="p-4 border-t text-right"><button onclick="toggleModalPortais()" class="px-5 py-2 bg-blue-600 text-white font-bold rounded-lg text-xs">Confirmar Filtro</button></div>
+    <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden border shadow-xl flex flex-col max-h-[85vh]">
+      <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+        <h3 class="font-bold text-sm">Filtro de Portais de Compra</h3>
+        <button onclick="toggleModalPortais()"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      
+      <!-- CAMPO DE PESQUISA DE PORTAIS -->
+      <div class="p-4 border-b bg-slate-50 space-y-3">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+          <input type="text" id="input-filtra-portais" onkeyup="filtrarListaPortaisModal()" placeholder="Pesquisar portal..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="flex justify-between items-center">
+          <label class="flex items-center gap-2 text-xs font-bold text-blue-700 cursor-pointer">
+            <input type="checkbox" id="chk-qualquer-portal" onchange="marcarTodosPortais()" class="rounded border-slate-300"> Qualquer Portal (Todos)
+          </label>
+          <span id="qtd-portais-carregados" class="text-[10px] text-slate-500 font-bold">...</span>
+        </div>
+      </div>
+
+      <!-- LISTA DE PORTAIS COM SUPORTE A FILTRO -->
+      <div class="p-4 space-y-1.5 overflow-y-auto flex-1" id="container-portais-checks"></div>
+      
+      <div class="p-4 border-t bg-slate-50 text-right">
+        <button onclick="toggleModalPortais()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Confirmar Filtro</button>
+      </div>
     </div>
   </div>
 
@@ -239,15 +260,66 @@
     function usarPalavraChave(termo) { document.getElementById('input-termo').value = termo; document.getElementById('modal-palavras-chave').classList.add('hidden'); buscarLicitacoes(1); }
     function toggleModalPortais() { document.getElementById('modal-portais').classList.toggle('hidden'); }
 
+    let listaPortaisGlobal = [];
+
     async function carregarPortaisDoBanco() {
       const container = document.getElementById('container-portais-checks');
       try {
         const res = await fetch(`${API_URL}/api/licitacoes/portais`);
         const data = await res.json();
-        document.getElementById('qtd-portais-carregados').textContent = `${data.portais.length} portais`;
-        container.innerHTML = data.portais.map(p => `<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer"><input type="checkbox" value="${p}" class="chk-portal rounded border-slate-300" onchange="atualizarTextoPortais()"> ${p}</label>`).join('');
+        listaPortaisGlobal = data.portais || [];
+        document.getElementById('qtd-portais-carregados').textContent = `${listaPortaisGlobal.length} portais`;
+        renderizarChecksPortais(listaPortaisGlobal);
       } catch (e) {}
     }
+
+    function renderizarChecksPortais(portais) {
+      const container = document.getElementById('container-portais-checks');
+      const portaisSelecionados = Array.from(document.querySelectorAll('.chk-portal:checked')).map(cb => cb.value);
+
+      if (portais.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhum portal encontrado.</p>`;
+        return;
+      }
+
+      container.innerHTML = portais.map(p => {
+        const checked = portaisSelecionados.includes(p) ? 'checked' : '';
+        return `
+          <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 p-2 rounded-lg cursor-pointer transition-colors item-portal">
+            <input type="checkbox" value="${p}" ${checked} class="chk-portal rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="atualizarTextoPortais()"> 
+            <span class="truncate">${p}</span>
+          </label>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function filtrarListaPortaisModal() {
+      const termo = document.getElementById('input-filtra-portais').value.toLowerCase();
+      const filtrados = listaPortaisGlobal.filter(p => p.toLowerCase().includes(termo));
+      renderizarChecksPortais(filtrados);
+    }
+
+    function marcarTodosPortais() { 
+      document.querySelectorAll('.chk-portal').forEach(cb => cb.checked = false); 
+      atualizarTextoPortais(); 
+    }
+
+    function atualizarTextoPortais() {
+      const sels = Array.from(document.querySelectorAll('.chk-portal:checked')).map(cb => cb.value);
+      const chkQualquer = document.getElementById('chk-qualquer-portal');
+      const label = document.getElementById('label-portais-selecionados');
+      if (sels.length > 0) { 
+        chkQualquer.checked = false; 
+        label.textContent = `${sels.length} Portal(is) selecionado(s)`; 
+      } else { 
+        chkQualquer.checked = true; 
+        label.textContent = "Qualquer Portal (Todos)"; 
+      }
+    }
+
+
+
 
     function marcarTodosPortais() { document.querySelectorAll('.chk-portal').forEach(cb => cb.checked = false); atualizarTextoPortais(); }
     function atualizarTextoPortais() {
@@ -313,6 +385,7 @@
       } catch (e) { document.getElementById('tabela-corpo').innerHTML = `<tr><td colSpan="8" class="py-12 text-center text-red-500">Erro na consulta.</td></tr>`; }
     }
 
+    // FUNÇÃO DA TABELA CORRIGIDA PARA EVITAR TEXTO ENCAVALADO
     function renderizarTabela() {
       const corpo = document.getElementById('tabela-corpo'); 
       const modoValor = document.getElementById('select-exibir-valor').value;
@@ -325,7 +398,6 @@
         const descExibicao = item.descricao_item || item.objeto_edital || 'S/ Info';
         const qtdExibicao = item.quantidade ? Number(item.quantidade).toLocaleString('pt-BR') : '1';
         
-        // Formatação dos diferentes valores
         const valUnitario = formatarMoeda(item.valor_unitario_estimado);
         const valTotalItem = formatarMoeda(item.valor_total_estimado);
         const valTotalCompra = formatarMoeda(item.valor_total_compra || item.valor_total_estimado);
@@ -335,29 +407,32 @@
         else if (modoValor === 'total_edital') valorExibicao = valTotalCompra;
 
         return `
-          <tr class="hover:bg-slate-50 border-b border-slate-100">
-            <td class="py-3 px-3 text-center">
+          <tr class="hover:bg-slate-50 border-b border-slate-100 align-top">
+            <td class="py-4 px-3 text-center">
               <button onclick="document.getElementById('linha-detalhe-${index}').classList.toggle('hidden')" class="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors">
                 <i data-lucide="chevron-down" class="w-4 h-4"></i>
               </button>
             </td>
-            <td class="py-3 px-4 font-semibold text-slate-900">
-              ${item.orgao_nome} <span class="bg-slate-100 text-[10px] font-bold px-2 py-0.5 rounded text-slate-700">${item.uf}</span>
-              <span class="block text-[10px] text-blue-600 font-bold mt-0.5">🌐 Portal: ${item.portal_nome || 'PNCP'}</span>
+            <td class="py-4 px-4 font-semibold text-slate-900 max-w-[200px] break-words">
+              ${item.orgao_nome} 
+              <span class="inline-block bg-slate-100 text-[10px] font-bold px-1.5 py-0.5 rounded text-slate-700 ml-1">${item.uf}</span>
+              <span class="block text-[10px] text-blue-600 font-bold mt-1">🌐 Portal: ${item.portal_nome || 'PNCP'}</span>
             </td>
-            <td class="py-3 px-4 text-xs font-medium text-slate-700">
+            <td class="py-4 px-4 text-xs font-medium text-slate-700 whitespace-nowrap">
               <span class="font-bold text-slate-900">Edital: ${item.numero_compra || item.sequencial}</span>
-              <br><span class="text-slate-500">${item.modalidade_nome}</span>
+              <br><span class="text-slate-500">${item.modalidade_nome || 'Dispensa'}</span>
             </td>
-            <td class="py-3 px-4 max-w-md line-clamp-2 text-slate-800">${descExibicao}</td>
-            <td class="py-3 px-4 text-center font-bold text-slate-700">${qtdExibicao}</td>
-            <td class="py-3 px-4 text-[11px] text-slate-600 leading-tight">
+            <td class="py-4 px-4 max-w-sm text-slate-800 break-words leading-relaxed">
+              <p class="line-clamp-2">${descExibicao}</p>
+            </td>
+            <td class="py-4 px-4 text-center font-bold text-slate-700 whitespace-nowrap">${qtdExibicao}</td>
+            <td class="py-4 px-4 text-[11px] text-slate-600 leading-normal whitespace-nowrap">
               <strong>Pub:</strong> ${formatarData(item.data_publicacao)}<br>
               <strong>Abert:</strong> ${formatarData(item.data_abertura)}<br>
               <strong>Enc:</strong> ${formatarData(item.data_encerramento)}
             </td>
-            <td class="py-3 px-4 text-right font-bold text-slate-900">${valorExibicao}</td>
-            <td class="py-3 px-4 text-center">
+            <td class="py-4 px-4 text-right font-bold text-slate-900 whitespace-nowrap">${valorExibicao}</td>
+            <td class="py-4 px-4 text-center whitespace-nowrap">
               <div class="flex items-center justify-center gap-1">
                 <button onclick="abrirModalAnaliseIA(${index})" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-xs flex items-center gap-1 transition-colors"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> IA</button>
                 <button onclick="abrirModalAnexos('${item.cnpj_orgao}', ${item.ano}, ${item.sequencial})" class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded-lg text-xs flex items-center gap-1 transition-colors"><i data-lucide="folder-down" class="w-3.5 h-3.5"></i> PDFs</button>
