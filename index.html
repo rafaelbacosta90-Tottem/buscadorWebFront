@@ -314,34 +314,84 @@
     }
 
     function renderizarTabela() {
-      const corpo = document.getElementById('tabela-corpo'); const modoValor = document.getElementById('select-exibir-valor').value;
-      if (dadosLocais.length === 0) { corpo.innerHTML = `<tr><td colSpan="8" class="py-12 text-center text-slate-400">Nenhum edital encontrado.</td></tr>`; return; }
+      const corpo = document.getElementById('tabela-corpo'); 
+      const modoValor = document.getElementById('select-exibir-valor').value;
+      if (dadosLocais.length === 0) { 
+        corpo.innerHTML = `<tr><td colSpan="8" class="py-12 text-center text-slate-400">Nenhum edital encontrado.</td></tr>`; 
+        return; 
+      }
 
       corpo.innerHTML = dadosLocais.map((item, index) => {
         const descExibicao = item.descricao_item || item.objeto_edital || 'S/ Info';
         const qtdExibicao = item.quantidade ? Number(item.quantidade).toLocaleString('pt-BR') : '1';
-        let valorExibicao = 'Não informado';
-        if (modoValor === 'unitario_item') valorExibicao = formatarMoeda(item.valor_unitario_estimado);
-        else if (modoValor === 'total_edital') valorExibicao = formatarMoeda(item.valor_total_compra || item.valor_total_estimado);
-        else valorExibicao = formatarMoeda(item.valor_total_estimado);
+        
+        // Formatação dos diferentes valores
+        const valUnitario = formatarMoeda(item.valor_unitario_estimado);
+        const valTotalItem = formatarMoeda(item.valor_total_estimado);
+        const valTotalCompra = formatarMoeda(item.valor_total_compra || item.valor_total_estimado);
+
+        let valorExibicao = valTotalItem;
+        if (modoValor === 'unitario_item') valorExibicao = valUnitario;
+        else if (modoValor === 'total_edital') valorExibicao = valTotalCompra;
 
         return `
           <tr class="hover:bg-slate-50 border-b border-slate-100">
-            <td class="py-3 px-3 text-center"><button onclick="document.getElementById('linha-detalhe-${index}').classList.toggle('hidden')" class="p-1 rounded bg-slate-100 hover:bg-slate-200"><i data-lucide="chevron-down" class="w-4 h-4"></i></button></td>
-            <td class="py-3 px-4 font-semibold text-slate-900">${item.orgao_nome} <span class="bg-slate-100 text-xs font-bold px-2 py-0.5 rounded">${item.uf}</span><span class="block text-[10px] text-blue-600 font-bold mt-0.5">🌐 Portal: ${item.portal_nome || 'PNCP'}</span></td>
-            <td class="py-3 px-4 text-xs">${item.numero_compra || item.sequencial}<br><span class="text-slate-400">${item.modalidade_nome}</span></td>
-            <td class="py-3 px-4 max-w-md line-clamp-2">${descExibicao}</td>
+            <td class="py-3 px-3 text-center">
+              <button onclick="document.getElementById('linha-detalhe-${index}').classList.toggle('hidden')" class="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors">
+                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+              </button>
+            </td>
+            <td class="py-3 px-4 font-semibold text-slate-900">
+              ${item.orgao_nome} <span class="bg-slate-100 text-[10px] font-bold px-2 py-0.5 rounded text-slate-700">${item.uf}</span>
+              <span class="block text-[10px] text-blue-600 font-bold mt-0.5">🌐 Portal: ${item.portal_nome || 'PNCP'}</span>
+            </td>
+            <td class="py-3 px-4 text-xs font-medium text-slate-700">
+              <span class="font-bold text-slate-900">Edital: ${item.numero_compra || item.sequencial}</span>
+              <br><span class="text-slate-500">${item.modalidade_nome}</span>
+            </td>
+            <td class="py-3 px-4 max-w-md line-clamp-2 text-slate-800">${descExibicao}</td>
             <td class="py-3 px-4 text-center font-bold text-slate-700">${qtdExibicao}</td>
-            <td class="py-3 px-4 text-[11px] text-slate-600 leading-tight"><strong>Pub:</strong> ${formatarData(item.data_publicacao)}<br><strong>Abert:</strong> ${formatarData(item.data_abertura)}<br><strong>Enc:</strong> ${formatarData(item.data_encerramento)}</td>
+            <td class="py-3 px-4 text-[11px] text-slate-600 leading-tight">
+              <strong>Pub:</strong> ${formatarData(item.data_publicacao)}<br>
+              <strong>Abert:</strong> ${formatarData(item.data_abertura)}<br>
+              <strong>Enc:</strong> ${formatarData(item.data_encerramento)}
+            </td>
             <td class="py-3 px-4 text-right font-bold text-slate-900">${valorExibicao}</td>
             <td class="py-3 px-4 text-center">
               <div class="flex items-center justify-center gap-1">
-                <button onclick="abrirModalAnaliseIA(${index})" class="px-2.5 py-1.5 bg-indigo-50 text-indigo-700 font-bold rounded-lg text-xs flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> IA</button>
-                <button onclick="abrirModalAnexos('${item.cnpj_orgao}', ${item.ano}, ${item.sequencial})" class="px-2.5 py-1.5 bg-amber-50 text-amber-700 font-bold rounded-lg text-xs flex items-center gap-1"><i data-lucide="folder-down" class="w-3.5 h-3.5"></i> PDFs</button>
+                <button onclick="abrirModalAnaliseIA(${index})" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-xs flex items-center gap-1 transition-colors"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> IA</button>
+                <button onclick="abrirModalAnexos('${item.cnpj_orgao}', ${item.ano}, ${item.sequencial})" class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded-lg text-xs flex items-center gap-1 transition-colors"><i data-lucide="folder-down" class="w-3.5 h-3.5"></i> PDFs</button>
               </div>
             </td>
           </tr>
-          <tr id="linha-detalhe-${index}" class="hidden bg-slate-50"><td colSpan="8" class="p-4 text-xs space-y-2"><p><strong>📦 Descrição Completa:</strong> ${descExibicao}</p></td></tr>
+          <tr id="linha-detalhe-${index}" class="hidden bg-slate-50/80 border-b border-slate-200">
+            <td colSpan="8" class="p-5 text-xs">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div class="space-y-1.5">
+                  <p class="font-bold text-slate-900 border-b pb-1 flex items-center gap-1"><i data-lucide="info" class="w-3.5 h-3.5 text-blue-600"></i> Informações do Órgão</p>
+                  <p><strong>CNPJ do Órgão:</strong> ${item.cnpj_orgao || 'Não informado'}</p>
+                  <p><strong>UASG / Código Unidade:</strong> <span class="text-blue-600 font-bold">${item.uasg || 'Não informado'}</span></p>
+                  <p><strong>Portal Oficial:</strong> ${item.portal_nome || 'PNCP'}</p>
+                </div>
+                <div class="space-y-1.5">
+                  <p class="font-bold text-slate-900 border-b pb-1 flex items-center gap-1"><i data-lucide="tag" class="w-3.5 h-3.5 text-emerald-600"></i> Detalhes do Edital</p>
+                  <p><strong>Número do Edital:</strong> ${item.numero_compra || 'Não informado'}</p>
+                  <p><strong>Ano / Sequencial:</strong> ${item.ano} / ${item.sequencial}</p>
+                  <p><strong>Chave do Edital:</strong> <span class="font-mono text-[10px] text-slate-500">${item.chave_edital}</span></p>
+                </div>
+                <div class="space-y-1.5">
+                  <p class="font-bold text-slate-900 border-b pb-1 flex items-center gap-1"><i data-lucide="dollar-sign" class="w-3.5 h-3.5 text-amber-600"></i> Detalhamento de Valores</p>
+                  <p><strong>Valor Unitário Estimado:</strong> <span class="font-semibold text-slate-700">${valUnitario}</span></p>
+                  <p><strong>Valor Total do Item:</strong> <span class="font-semibold text-slate-700">${valTotalItem}</span></p>
+                  <p><strong>Valor Total da Compra:</strong> <span class="font-bold text-emerald-700">${valTotalCompra}</span></p>
+                </div>
+              </div>
+              <div class="mt-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                <p class="font-bold text-slate-900 mb-1 flex items-center gap-1"><i data-lucide="file-text" class="w-3.5 h-3.5 text-blue-600"></i> Descrição Completa do Item / Objeto:</p>
+                <p class="text-slate-700 leading-relaxed">${descExibicao}</p>
+              </div>
+            </td>
+          </tr>
         `;
       }).join('');
       lucide.createIcons();
