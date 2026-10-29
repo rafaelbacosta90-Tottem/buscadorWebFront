@@ -406,6 +406,9 @@
         if (modoValor === 'unitario_item') valorExibicao = valUnitario;
         else if (modoValor === 'total_edital') valorExibicao = valTotalCompra;
 
+        // Monta URL oficial do PNCP
+        const urlPncpOficial = `https://pncp.gov.br/app/editais/${item.cnpj_orgao}/${item.ano}/${item.sequencial}`;
+
         return `
           <tr class="hover:bg-slate-50 border-b border-slate-100 align-top">
             <td class="py-4 px-3 text-center">
@@ -461,6 +464,14 @@
                   <p><strong>Valor Total da Compra:</strong> <span class="font-bold text-emerald-700">${valTotalCompra}</span></p>
                 </div>
               </div>
+
+              <!-- BOTÕES DE REDIRECIONAMENTO OFICIAL -->
+              <div class="mt-3 flex flex-wrap gap-3">
+                <a href="${urlPncpOficial}" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="external-link" class="w-4 h-4"></i> Abrir Edital no PNCP Oficial
+                </a>
+              </div>
+
               <div class="mt-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
                 <p class="font-bold text-slate-900 mb-1 flex items-center gap-1"><i data-lucide="file-text" class="w-3.5 h-3.5 text-blue-600"></i> Descrição Completa do Item / Objeto:</p>
                 <p class="text-slate-700 leading-relaxed">${descExibicao}</p>
@@ -473,13 +484,46 @@
     }
 
     async function abrirModalAnexos(cnpj, ano, seq) {
-      document.getElementById('modal-anexos').classList.remove('hidden'); document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-slate-400 text-center">Buscando documentos...</p>`;
+      document.getElementById('modal-anexos').classList.remove('hidden'); 
+      document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Buscando documentos oficiais...</p>`;
+      
+      // Links diretos para PNCP
+      let htmlLinks = `
+        <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between gap-3 mb-4">
+          <div>
+            <span class="text-xs font-bold text-blue-900 block">🌐 Acessar no PNCP Oficial</span>
+            <span class="text-[10px] text-blue-700">Visualizar a compra diretamente no Portal Nacional.</span>
+          </div>
+          <a href="https://pncp.gov.br/app/editais/${cnpj}/${ano}/${seq}" target="_blank" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Abrir PNCP</a>
+        </div>
+      `;
+
       try {
         const res = await fetch(`${API_URL}/api/licitacoes/arquivos?cnpj=${cnpj}&ano=${ano}&sequencial=${seq}`);
         const data = await res.json();
-        if (!data.arquivos || data.arquivos.length === 0) { document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-slate-500 text-center py-6">Nenhum documento anexado.</p>`; return; }
-        document.getElementById('lista-anexos-corpo').innerHTML = data.arquivos.map(arq => `<div class="p-3 bg-slate-50 border rounded-xl flex items-center justify-between gap-3"><div><span class="text-xs font-medium text-slate-800">${arq.titulo || 'Documento'}</span></div><a href="${arq.url}" target="_blank" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs">Baixar</a></div>`).join('');
-      } catch (e) {}
+        const arquivos = data.arquivos || [];
+
+        if (arquivos.length === 0) {
+          htmlLinks += `<p class="text-xs text-slate-400 text-center py-4">Nenhum arquivo PDF anexado diretamente na API do PNCP para este edital.</p>`;
+        } else {
+          htmlLinks += arquivos.map(arq => `
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3 mb-2">
+              <div>
+                <span class="text-xs font-semibold text-slate-800 block">${arq.titulo || arq.nomeArquivo || 'Documento Oficial'}</span>
+                <span class="text-[10px] text-slate-400">Tipo: ${arq.tipoDocumentoNome || 'PDF'}</span>
+              </div>
+              <a href="${arq.url}" target="_blank" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs shadow flex items-center gap-1">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> Baixar PDF
+              </a>
+            </div>
+          `).join('');
+        }
+
+        document.getElementById('lista-anexos-corpo').innerHTML = htmlLinks;
+        lucide.createIcons();
+      } catch (e) {
+        document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao buscar anexos.</p>`;
+      }
     }
 
     async function abrirModalAnaliseIA(index) {
