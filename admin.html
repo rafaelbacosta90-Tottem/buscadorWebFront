@@ -19,12 +19,11 @@
 
   <main class="max-w-6xl mx-auto p-6 space-y-8">
     
-    <!-- GESTÃO DE USUÁRIOS -->
     <div class="bg-white p-6 rounded-2xl border shadow-sm">
       <div class="flex justify-between items-center mb-6">
         <div>
           <h2 class="font-bold text-xl text-slate-800">Usuários e Acessos</h2>
-          <p class="text-xs text-slate-500">Gerenciamento de contas, permissões e vinculação empresarial.</p>
+          <p class="text-xs text-slate-500">Gerenciamento de contas e vínculos com empresas.</p>
         </div>
         <button onclick="document.getElementById('modal-usuario').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow">Novo Usuário</button>
       </div>
@@ -49,7 +48,7 @@
         <button onclick="syncStop()" class="bg-red-100 hover:bg-red-200 text-red-700 px-5 py-2.5 rounded-lg font-bold flex gap-2 items-center"><i data-lucide="square" class="w-4 h-4"></i> Parar Sincronização</button>
       </div>
 
-      <!-- STATUS DA VARREDURA -->
+      <!-- STATUS VISUAL DA VARREDURA -->
       <div id="painel-progresso" class="hidden p-5 bg-slate-900 text-white rounded-2xl space-y-4 shadow-inner">
         <div class="flex items-center justify-between">
           <span id="sync-status-msg" class="text-sm font-bold text-amber-400 flex items-center gap-2"><i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Executando...</span>
@@ -57,13 +56,15 @@
         </div>
         
         <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-          <div id="sync-bar" class="bg-indigo-500 h-2 rounded-full transition-all" style="width: 100%"></div>
+          <div id="sync-bar" class="bg-indigo-500 h-2 rounded-full transition-all duration-1000" style="width: 100%"></div>
         </div>
         
+        <!-- BOTÃO DE LOGS QUE VOCÊ PEDIU -->
         <div>
           <button onclick="toggleLogs()" class="text-xs font-bold text-indigo-300 hover:text-indigo-200 flex items-center gap-1 mb-2"><i data-lucide="terminal" class="w-3.5 h-3.5"></i> Mostrar/Ocultar Logs Detalhados</button>
+          
           <div id="sync-logs-container" class="hidden h-48 overflow-y-auto bg-black/50 p-3 rounded-lg border border-slate-700 font-mono text-[10px] text-slate-300 space-y-1">
-            <!-- Logs aparecem aqui -->
+            <!-- As mensagens de Log aparecerão aqui! -->
           </div>
         </div>
       </div>
@@ -81,7 +82,6 @@
     </div>
   </main>
 
-  <!-- MODAL USUÁRIO -->
   <div id="modal-usuario" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50">
     <div class="bg-white p-6 rounded-2xl w-full max-w-sm space-y-4 shadow-2xl">
       <div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-lg text-slate-800">Cadastrar Usuário</h3><button onclick="document.getElementById('modal-usuario').classList.add('hidden')"><i data-lucide="x" class="text-slate-400 w-5 h-5"></i></button></div>
@@ -116,34 +116,41 @@
 
     function toggleLogs() { document.getElementById('sync-logs-container').classList.toggle('hidden'); }
 
-    async function syncStart() { await fetch(`${API}/api/admin/sincronizar?admin_id=${user.user_id}`, {method:'POST'}); document.getElementById('painel-progresso').classList.remove('hidden'); checkSync(); }
+    async function syncStart() { 
+      try {
+        await fetch(`${API}/api/admin/sincronizar?admin_id=${user.user_id}`, {method:'POST'}); 
+        document.getElementById('painel-progresso').classList.remove('hidden'); 
+        document.getElementById('sync-status-msg').innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Solicitando início...`;
+        lucide.createIcons();
+      } catch(e) { alert("Erro de conexão com o robô."); }
+    }
+    
     async function syncStop() { await fetch(`${API}/api/admin/parar-sincronizacao?admin_id=${user.user_id}`, {method:'POST'}); }
     
-    function checkSync() {
-      setInterval(async()=>{
-        try {
-          const r = await fetch(`${API}/api/admin/sincronizacao-status?admin_id=${user.user_id}`); const d = await r.json();
-          const bx = document.getElementById('painel-progresso');
+    // Polling contínuo dos status e logs
+    setInterval(async()=>{
+      try {
+        const r = await fetch(`${API}/api/admin/sincronizacao-status?admin_id=${user.user_id}`); const d = await r.json();
+        const bx = document.getElementById('painel-progresso');
+        
+        if(d.em_andamento || (d.mensagem && d.mensagem.includes('Finalizado'))) { 
+          bx.classList.remove('hidden'); 
+          document.getElementById('sync-status-msg').innerHTML = d.em_andamento ? `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> ${d.mensagem}` : `✅ ${d.mensagem}`;
+          document.getElementById('sync-qtd').innerText = d.novos_inseridos || 0;
           
-          if(d.em_andamento || d.mensagem.includes('Finalizado')) { 
-            bx.classList.remove('hidden'); 
-            document.getElementById('sync-status-msg').innerHTML = d.em_andamento ? `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> ${d.mensagem}` : `✅ ${d.mensagem}`;
-            document.getElementById('sync-qtd').innerText = d.novos_inseridos || 0;
-            
-            if(d.logs && d.logs.length > 0) {
-               document.getElementById('sync-logs-container').innerHTML = d.logs.map(log => {
-                   let cor = "text-slate-300";
-                   if(log.includes("✅")) cor = "text-emerald-400 font-bold";
-                   if(log.includes("❌")) cor = "text-red-400 font-bold";
-                   if(log.includes("⚠️")) cor = "text-amber-400";
-                   return `<div class="${cor}">${log}</div>`;
-               }).join('');
-            }
-            lucide.createIcons();
+          if(d.logs && d.logs.length > 0) {
+             document.getElementById('sync-logs-container').innerHTML = d.logs.map(log => {
+                 let cor = "text-slate-300";
+                 if(log.includes("✅")) cor = "text-emerald-400 font-bold text-[11px]";
+                 if(log.includes("❌")) cor = "text-red-400 font-bold text-[11px]";
+                 if(log.includes("⚠️")) cor = "text-amber-400";
+                 return `<div class="${cor} border-b border-slate-700/50 pb-1 mb-1">${log}</div>`;
+             }).join('');
           }
-        } catch(e) {}
-      }, 2000);
-    }
+          lucide.createIcons();
+        }
+      } catch(e) {}
+    }, 2000);
 
     async function loadAg() {
       const r = await fetch(`${API}/api/admin/agendamento?admin_id=${user.user_id}`); const d = await r.json();
@@ -154,7 +161,7 @@
       alert("Configuração Salva!");
     }
 
-    loadU(); loadAg(); checkSync(); lucide.createIcons();
+    loadU(); loadAg(); lucide.createIcons();
   </script>
 </body>
 </html>
