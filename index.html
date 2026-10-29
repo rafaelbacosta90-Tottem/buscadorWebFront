@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hub Licitações - PNCP Web</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col">
+
+  <!-- TELA DE LOGIN -->
+  <div id="tela-login" class="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 border border-slate-100">
+      <div class="text-center mb-8">
+        <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 font-bold text-xl shadow-lg">
+          PNCP
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900">Acesse o Hub Licitações</h2>
+        <p class="text-slate-500 text-sm mt-1">Validação de Licença e CNPJ</p>
+      </div>
+
+      <div id="auth-error" class="hidden mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-200"></div>
+
+      <form id="form-login" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail</label>
+          <input type="email" id="email" required value="admin@teste.com" class="w-full px-4 py-2.5 bg-slate-50 border rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
+          <input type="password" id="password" required value="123456" class="w-full px-4 py-2.5 bg-slate-50 border rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-sm transition-all shadow-md">
+          Entrar no Sistema
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PRINCIPAL -->
+  <div id="tela-dashboard" class="hidden flex-col min-h-screen">
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="bg-blue-600 p-2 rounded-lg font-bold text-lg">PNCP</div>
+          <span class="font-semibold text-lg tracking-wide">Hub Licitações</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="text-right">
+            <span id="user-empresa" class="text-xs font-bold text-amber-400 block">--</span>
+            <span id="user-nome" class="text-[10px] text-slate-400 block">--</span>
+          </div>
+          <a id="link-admin" href="admin.html" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold px-3 py-1.5 rounded-lg border border-slate-700">Painel Admin</a>
+          <button id="btn-logout" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs border border-slate-700">Sair</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-6 space-y-6 flex-1 w-full">
+      <!-- PAINEL DE FILTROS AVANÇADOS -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <!-- LINHA 1: TERMO E ONDE BUSCAR -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="md:col-span-3">
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Produto/Serviço (Termo de busca):</label>
+            <input type="text" id="input-termo" placeholder="Digite o termo ou deixe vazio p/ usar palavras cadastradas" class="w-full px-3.5 py-2 bg-slate-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Onde buscar o termo:</label>
+            <select id="select-onde-buscar" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="todos">Todos (Item e Objeto)</option>
+              <option value="item">Apenas no Item</option>
+              <option value="objeto">Apenas no Objeto</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- LINHA 2: TIPO DATA, PERÍODO E STATUS -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar Data Por:</label>
+            <select id="select-tipo-data" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="publicacao">Data de Publicação</option>
+              <option value="abertura">Data de Abertura</option>
+              <option value="encerramento">Data de Encerramento</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Período (Início / Fim):</label>
+            <div class="flex items-center gap-2">
+              <input type="date" id="input-dt-inicio" class="w-1/2 px-3 py-1.5 bg-slate-50 border rounded-lg text-xs">
+              <span class="text-xs text-slate-400 font-bold">Até</span>
+              <input type="date" id="input-dt-fim" class="w-1/2 px-3 py-1.5 bg-slate-50 border rounded-lg text-xs">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Status do Edital:</label>
+            <select id="select-status-edital" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="todos">Todos</option>
+              <option value="encerradas">Encerradas</option>
+              <option value="recebendo">A Receber/Recebendo Proposta</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- LINHA 3: PORTAIS, CATEGORIA, EXIBIR VALOR, MODALIDADE E UF -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Portais de Compra:</label>
+            <button onclick="toggleModalPortais()" class="w-full bg-blue-50 border border-blue-200 text-blue-700 py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-between">
+              <span id="label-portais-selecionados">Qualquer Portal (Todos)</span>
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Categoria do Processo:</label>
+            <select id="select-categoria" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="Todas">Todas</option>
+              <option value="Cessão">Cessão</option>
+              <option value="Compras">Compras</option>
+              <option value="Informática (TIC)">Informática (TIC)</option>
+              <option value="Internacional">Internacional</option>
+              <option value="Locação Imóveis">Locação Imóveis</option>
+              <option value="Mão de Obra">Mão de Obra</option>
+              <option value="Obras">Obras</option>
+              <option value="Serviços">Serviços</option>
+              <option value="Serviços de Engenharia">Serviços de Engenharia</option>
+              <option value="Serviços de Saúde">Serviços de Saúde</option>
+              <option value="Alienação de bens móveis/imóveis">Alienação de bens móveis/imóveis</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Exibir Valor:</label>
+            <select id="select-exibir-valor" onchange="renderizarTabela()" class="w-full bg-slate-50 border border-blue-200 text-blue-900 font-bold py-2 px-2.5 rounded-lg text-sm">
+              <option value="total_item">Valor Total do Item</option>
+              <option value="unitario_item">Valor Unitário do Item</option>
+              <option value="total_edital">Valor Total da Compra (Edital)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Modalidade Contratação:</label>
+            <select id="select-modalidade" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="">Principais (Pregão, Dispensa, Conc.)</option>
+              <option value="8">Dispensa com Disputa</option>
+              <option value="6">Pregão Eletrônico</option>
+              <option value="4">Concorrência Eletrônica</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estado (UF) do Órgão:</label>
+            <select id="select-uf" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium">
+              <option value="Todas">Todas UFs</option>
+              <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- LINHA 4: Nº EDITAL, UASG E BOTÃO PESQUISAR -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2 border-t border-slate-100">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nº Edital (Ex: 10/2026):</label>
+            <input type="text" id="input-edital" placeholder="Número do edital" class="w-full px-3.5 py-2 bg-slate-50 border rounded-lg text-sm focus:outline-none">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">UASG / CNPJ do Órgão:</label>
+            <input type="text" id="input-uasg" placeholder="Código UASG ou CNPJ do Órgão" class="w-full px-3.5 py-2 bg-slate-50 border rounded-lg text-sm focus:outline-none">
+          </div>
+          <div class="flex items-end">
+            <button id="btn-pesquisar" onclick="buscarLicitacoes(1)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm shadow-md flex items-center justify-center gap-2">
+              <i data-lucide="search" class="w-4 h-4"></i> Pesquisar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA DE RESULTADOS -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+        <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <span class="text-xs font-bold uppercase text-slate-500">Resultados</span>
+          <span id="label-total" class="text-xs font-bold text-blue-600">0 itens</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-xs">
+              <tr>
+                <th class="py-3 px-4 w-10"></th>
+                <th class="py-3 px-4">Órgão / UF</th>
+                <th class="py-3 px-4">Edital / Modalidade</th>
+                <th class="py-3 px-4">Descrição do Item</th>
+                <th class="py-3 px-4 text-center">Qtd</th>
+                <th class="py-3 px-4">Datas (Pub / Abert / Enc)</th>
+                <th class="py-3 px-4 text-right">Valor Estimado</th>
+                <th class="py-3 px-4 text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-corpo" class="divide-y divide-slate-100 text-slate-700">
+              <tr><td colSpan="8" class="py-12 text-center text-slate-400">Clique em Pesquisar para carregar registros.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+          <span id="info-paginacao" class="text-xs font-medium text-slate-500">Página 1 de 1</span>
+          <div class="flex gap-2">
+            <button id="btn-anterior" disabled class="px-3 py-1.5 bg-white border text-xs font-bold rounded-lg disabled:opacity-50">← Anterior</button>
+            <button id="btn-proximo" disabled class="px-3 py-1.5 bg-white border text-xs font-bold rounded-lg disabled:opacity-50">Próximo →</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL DINÂMICO PARA SELEÇÃO DE PORTAIS -->
+  <div id="modal-portais" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
+      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <h3 class="font-bold text-sm">Filtro de Portais</h3>
+        <button onclick="toggleModalPortais()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+        <label class="flex items-center gap-2 text-xs font-bold text-blue-700 cursor-pointer">
+          <input type="checkbox" id="chk-qualquer-portal" onchange="marcarTodosPortais(this)" checked class="rounded border-slate-300">
+          Qualquer Portal (Todos)
+        </label>
+        <span id="qtd-portais-carregados" class="text-[10px] text-slate-500 font-bold">Carregando...</span>
+      </div>
+
+      <div class="p-6 space-y-2.5 max-h-[60vh] overflow-y-auto" id="container-portais-checks">
+        <p class="text-xs text-slate-400 text-center py-4">Buscando portais cadastrados...</p>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-200 text-right">
+        <button onclick="toggleModalPortais()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Confirmar Filtro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ANEXOS -->
+  <div id="modal-anexos" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 flex flex-col">
+      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <h3 class="font-bold text-sm flex items-center gap-2"><i data-lucide="folder-down" class="w-4 h-4 text-amber-400"></i> Documentos Oficiais do Edital</h3>
+        <button onclick="document.getElementById('modal-anexos').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="lista-anexos-corpo" class="p-6 max-h-[60vh] overflow-y-auto space-y-3"></div>
+      <div class="p-4 border-t border-slate-100 bg-slate-50 text-right">
+        <button onclick="document.getElementById('modal-anexos').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE IA & PDF LOCAL -->
+  <div id="modal-analise-ia" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <h3 class="font-bold text-sm flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i> Análise Inteligente do Edital</h3>
+        <button onclick="document.getElementById('modal-analise-ia').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-4 bg-indigo-50 border-b border-indigo-100 flex flex-wrap gap-2 items-center justify-between">
+        <span class="text-xs font-bold text-indigo-900">Análise de PDF local do computador:</span>
+        <input type="file" id="input-pdf-local" accept=".pdf" class="hidden" onchange="processarPDFLocal(event)">
+        <button onclick="document.getElementById('input-pdf-local').click()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs flex items-center gap-1">
+          <i data-lucide="file-up" class="w-4 h-4"></i> Carregar PDF do PC
+        </button>
+      </div>
+
+      <div id="conteudo-ia-corpo" class="p-6 overflow-y-auto flex-1 font-mono text-xs leading-relaxed bg-slate-50"></div>
+
+      <div class="p-4 border-t border-slate-100 bg-white flex justify-end">
+        <button onclick="document.getElementById('modal-analise-ia').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const API_URL = "https://buscador-web-6i6s.onrender.com";
+    let usuarioAtual = null;
+    let dadosLocais = [];
+    let listaPortaisGlobais = [];
+    let paginaAtual = 1, totalPaginas = 1;
+
+    async function carregarPortaisDoBanco() {
+  const container = document.getElementById('container-portais-checks');
+  try {
+    const res = await fetch(`${API_URL}/api/licitacoes/portais`);
+    const data = await res.json();
+    listaPortaisGlobais = data.portais || [];
+
+    document.getElementById('qtd-portais-carregados').textContent = `${listaPortaisGlobais.length} portais disponíveis`;
+
+    if (listaPortaisGlobais.length === 0) {
+      container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhum portal disponível.</p>`;
+      return;
+    }
+
+    container.innerHTML = listaPortaisGlobais.map(portal => `
+      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer">
+        <input type="checkbox" value="${portal}" class="chk-portal rounded border-slate-300" onchange="atualizarTextoPortais()"> ${portal}
+      </label>
+    `).join('');
+
+  } catch (e) {
+    container.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar lista de portais.</p>`;
+  }
+}
+
+
+    function formatarData(dtString) {
+      if (!dtString) return '--';
+      try {
+        const d = new Date(dtString);
+        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+      } catch (e) { return '--'; }
+    }
+
+    function formatarMoeda(val) {
+      if (val === null || val === undefined || isNaN(val) || val <= 0) return 'Não informado';
+      return 'R$ ' + Number(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function toggleModalPortais() {
+      document.getElementById('modal-portais').classList.toggle('hidden');
+    }
+
+    
+    function marcarTodosPortais(chk) {
+      const checkboxes = document.querySelectorAll('.chk-portal');
+      checkboxes.forEach(cb => cb.checked = false);
+      atualizarTextoPortais();
+    }
+
+    function atualizarTextoPortais() {
+      const selecionados = Array.from(document.querySelectorAll('.chk-portal:checked')).map(cb => cb.value);
+      const chkQualquer = document.getElementById('chk-qualquer-portal');
+      const label = document.getElementById('label-portais-selecionados');
+
+      if (selecionados.length > 0) {
+        chkQualquer.checked = false;
+        label.textContent = `${selecionados.length} Portal(is) Selecionado(s)`;
+      } else {
+        chkQualquer.checked = true;
+        label.textContent = "Qualquer Portal (Todos)";
+      }
+    }
+
+    function checarSessao() {
+      const sessaoSalva = localStorage.getItem('usuario_sessao');
+      if (sessaoSalva) {
+        usuarioAtual = JSON.parse(sessaoSalva);
+        document.getElementById('tela-login').classList.add('hidden');
+        document.getElementById('tela-dashboard').classList.remove('hidden');
+        document.getElementById('tela-dashboard').classList.add('flex');
+
+        document.getElementById('user-empresa').textContent = usuarioAtual.empresa;
+        document.getElementById('user-nome').textContent = usuarioAtual.usuario;
+
+        const btnAdmin = document.getElementById('link-admin');
+        if (usuarioAtual.is_admin === true) {
+          btnAdmin.classList.remove('hidden');
+        } else {
+          btnAdmin.classList.add('hidden');
+        }
+
+        carregarPortaisDoBanco();
+        buscarLicitacoes(1);
+      } else {
+        document.getElementById('tela-dashboard').classList.add('hidden');
+        document.getElementById('tela-login').classList.remove('hidden');
+      }
+    }
+
+    document.getElementById('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errBox = document.getElementById('auth-error');
+
+      try {
+        const res = await fetch(`${API_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, senha: password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem('usuario_sessao', JSON.stringify(data));
+          checarSessao();
+        } else {
+          errBox.textContent = data.detail || "Erro no login.";
+          errBox.classList.remove('hidden');
+        }
+      } catch (err) {
+        errBox.textContent = "Falha ao conectar com o servidor FastAPI.";
+        errBox.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      localStorage.removeItem('usuario_sessao');
+      checarSessao();
+    });
+
+    async function buscarLicitacoes(pagina = 1) {
+      paginaAtual = pagina;
+      const corpo = document.getElementById('tabela-corpo');
+      corpo.innerHTML = `<tr><td colSpan="8" class="py-12 text-center text-slate-400">Consultando base central...</td></tr>`;
+
+      const params = new URLSearchParams();
+      if (document.getElementById('input-termo').value) params.append('termo', document.getElementById('input-termo').value);
+      params.append('onde_buscar', document.getElementById('select-onde-buscar').value);
+      params.append('status_edital', document.getElementById('select-status-edital').value);
+      params.append('tipo_data', document.getElementById('select-tipo-data').value);
+      
+      if (document.getElementById('input-dt-inicio').value) params.append('data_inicio', document.getElementById('input-dt-inicio').value);
+      if (document.getElementById('input-dt-fim').value) params.append('data_fim', document.getElementById('input-dt-fim').value);
+      if (document.getElementById('select-categoria').value !== 'Todas') params.append('categoria', document.getElementById('select-categoria').value);
+      if (document.getElementById('select-uf').value !== 'Todas') params.append('uf', document.getElementById('select-uf').value);
+      if (document.getElementById('select-modalidade').value) params.append('modalidade_id', document.getElementById('select-modalidade').value);
+      if (document.getElementById('input-edital').value) params.append('edital', document.getElementById('input-edital').value);
+      if (document.getElementById('input-uasg').value) params.append('uasg', document.getElementById('input-uasg').value);
+
+      const portaisSel = Array.from(document.querySelectorAll('.chk-portal:checked')).map(cb => cb.value);
+      if (portaisSel.length > 0) params.append('portais', portaisSel.join(','));
+
+      params.append('pagina', paginaAtual);
+      params.append('limite', 50);
+
+      try {
+        const res = await fetch(`${API_URL}/api/licitacoes/pesquisar?${params}`);
+        const data = await res.json();
+        dadosLocais = data.dados || [];
+
+        document.getElementById('label-total').textContent = `${(data.total_registros || 0).toLocaleString('pt-BR')} itens`;
+        totalPaginas = data.total_paginas || 1;
+        document.getElementById('info-paginacao').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+
+        document.getElementById('btn-anterior').disabled = paginaAtual <= 1;
+        document.getElementById('btn-proximo').disabled = paginaAtual >= totalPaginas;
+
+        renderizarTabela();
+      } catch (e) {
+        corpo.innerHTML = `<tr><td colSpan="8" class="py-12 text-center text-red-500">Erro ao consultar a API.</td></tr>`;
+      }
+    }
+
+    function renderizarTabela() {
+      const corpo = document.getElementById('tabela-corpo');
+      const modoValor = document.getElementById('select-exibir-valor').value;
+
+      if (dadosLocais.length === 0) {
+        corpo.innerHTML = `<tr><td colSpan="8" class="py-12 text-center text-slate-400">Nenhum edital encontrado.</td></tr>`;
+        return;
+      }
+
+      corpo.innerHTML = dadosLocais.map((item, index) => {
+        const descExibicao = item.descricao_item || item.objeto_edital || 'Objeto não informado';
+        const qtdExibicao = item.quantidade ? Number(item.quantidade).toLocaleString('pt-BR') : '1';
+        
+        let valorExibicao = 'Não informado';
+        if (modoValor === 'unitario_item') {
+          valorExibicao = formatarMoeda(item.valor_unitario_estimado);
+        } else if (modoValor === 'total_edital') {
+          valorExibicao = formatarMoeda(item.valor_total_compra || item.valor_total_estimado);
+        } else {
+          valorExibicao = formatarMoeda(item.valor_total_estimado);
+        }
+
+        return `
+          <tr class="hover:bg-slate-50 border-b border-slate-100">
+            <td class="py-3 px-3 text-center">
+              <button onclick="document.getElementById('linha-detalhe-${index}').classList.toggle('hidden')" class="p-1 rounded bg-slate-100 hover:bg-slate-200">
+                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+              </button>
+            </td>
+            <td class="py-3 px-4 font-semibold text-slate-900">
+              ${item.orgao_nome} <span class="bg-slate-100 text-xs font-bold px-2 py-0.5 rounded">${item.uf}</span>
+              <span class="block text-[10px] text-blue-600 font-bold mt-0.5">🌐 Portal: ${item.portal_nome || 'PNCP / Outro'}</span>
+            </td>
+            <td class="py-3 px-4 text-xs">${item.numero_compra || item.sequencial}<br><span class="text-slate-400">${item.modalidade_nome}</span></td>
+            <td class="py-3 px-4 max-w-md line-clamp-2">${descExibicao}</td>
+            <td class="py-3 px-4 text-center font-bold text-slate-700">${qtdExibicao}</td>
+            <td class="py-3 px-4 text-[11px] text-slate-600 leading-tight">
+              <strong>Pub:</strong> ${formatarData(item.data_publicacao)}<br>
+              <strong>Abert:</strong> ${formatarData(item.data_abertura)}<br>
+              <strong>Enc:</strong> ${formatarData(item.data_encerramento)}
+            </td>
+            <td class="py-3 px-4 text-right font-bold text-slate-900">${valorExibicao}</td>
+            <td class="py-3 px-4 text-center">
+              <div class="flex items-center justify-center gap-1">
+                <button onclick="abrirModalAnaliseIA(${index})" class="px-2.5 py-1.5 bg-indigo-50 text-indigo-700 font-bold rounded-lg text-xs flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> IA</button>
+                <button onclick="abrirModalAnexos('${item.cnpj_orgao}', ${item.ano}, ${item.sequencial})" class="px-2.5 py-1.5 bg-amber-50 text-amber-700 font-bold rounded-lg text-xs flex items-center gap-1"><i data-lucide="folder-down" class="w-3.5 h-3.5"></i> PDFs</button>
+                <a href="https://pncp.gov.br/app/editais/${item.cnpj_orgao}/${item.ano}/${item.sequencial}" target="_blank" title="Abrir no PNCP Oficial" class="p-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-xs"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>
+              </div>
+            </td>
+          </tr>
+          <tr id="linha-detalhe-${index}" class="hidden bg-slate-50">
+            <td colSpan="8" class="p-4 text-xs space-y-2">
+              <p><strong>🏢 Órgão:</strong> ${item.orgao_nome} (${item.uf}) | <strong>UASG:</strong> ${item.uasg || 'N/I'}</p>
+              <p><strong>🌐 Portal de Origem:</strong> ${item.portal_nome || 'Não informado'}</p>
+              <p><strong>🔢 Quantidade:</strong> ${qtdExibicao}</p>
+              <p><strong>💰 Detalhamento de Preços:</strong> 
+                <strong>Unitário:</strong> ${formatarMoeda(item.valor_unitario_estimado)} | 
+                <strong>Total do Item:</strong> ${formatarMoeda(item.valor_total_estimado)} | 
+                <strong>Total Global da Compra:</strong> ${formatarMoeda(item.valor_total_compra)}
+              </p>
+              <p><strong>📅 Cronograma:</strong> Publicado em ${formatarData(item.data_publicacao)} | Abertura das propostas em ${formatarData(item.data_abertura)} | Encerramento em ${formatarData(item.data_encerramento)}</p>
+              <p><strong>📦 Descrição Completa:</strong> ${descExibicao}</p>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    async function abrirModalAnexos(cnpj, ano, seq) {
+      const modal = document.getElementById('modal-anexos');
+      const corpo = document.getElementById('lista-anexos-corpo');
+      modal.classList.remove('hidden');
+      corpo.innerHTML = `<p class="text-slate-400 text-center">Buscando documentos no PNCP...</p>`;
+
+      try {
+        const res = await fetch(`${API_URL}/api/licitacoes/arquivos?cnpj=${cnpj}&ano=${ano}&sequencial=${seq}`);
+        const data = await res.json();
+
+        if (!data.arquivos || data.arquivos.length === 0) {
+          corpo.innerHTML = `<p class="text-slate-500 text-center py-6">Nenhum documento anexado no PNCP.</p>`;
+          return;
+        }
+
+        corpo.innerHTML = data.arquivos.map(arq => `
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-bold text-amber-600 block">[${arq.tipoDocumentoNome || 'Anexo'}]</span>
+              <span class="text-xs font-medium text-slate-800 line-clamp-1">${arq.titulo || 'Documento'}</span>
+            </div>
+            <a href="${arq.url}" target="_blank" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs flex items-center gap-1 shrink-0">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Baixar
+            </a>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      } catch (e) {
+        corpo.innerHTML = `<p class="text-red-500 text-center py-6">Erro ao obter arquivos.</p>`;
+      }
+    }
+
+    async function abrirModalAnaliseIA(index) {
+      const item = dadosLocais[index];
+      const modal = document.getElementById('modal-analise-ia');
+      const corpo = document.getElementById('conteudo-ia-corpo');
+
+      modal.classList.remove('hidden');
+      corpo.innerHTML = `<p class="text-slate-500 text-center py-10">Analisando edital com IA...</p>`;
+
+      try {
+        const res = await fetch(`${API_URL}/api/licitacoes/analisar-ia`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: usuarioAtual.user_id,
+            ano: item.ano,
+            sequencial: item.sequencial,
+            cnpj_orgao: item.cnpj_orgao
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          corpo.innerHTML = `
+            <div class="p-6 bg-red-50 text-red-700 rounded-xl text-center space-y-2 font-sans">
+              <p class="font-bold">❌ Falha ao Executar Análise</p>
+              <p class="text-xs">${data.detail}</p>
+            </div>
+          `;
+          return;
+        }
+
+        corpo.innerHTML = `
+          <div class="mb-4 p-3 bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-lg text-xs font-sans flex justify-between">
+            <span>⚡ <strong>Provedor:</strong> ${data.provedor} | 🏢 <strong>Empresa:</strong> ${data.empresa}</span>
+            <span class="font-bold">📊 Uso Hoje: ${data.usos_hoje} / ${data.limite_diario} análises</span>
+          </div>
+          <pre class="whitespace-pre-wrap font-sans text-slate-800 leading-relaxed">${data.relatorio}</pre>
+        `;
+      } catch (e) {
+        corpo.innerHTML = `<p class="text-red-500 text-center py-10 font-sans">Erro ao conectar com a IA.</p>`;
+      }
+    }
+
+    async function processarPDFLocal(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const corpo = document.getElementById('conteudo-ia-corpo');
+      corpo.innerHTML = `<p class="text-indigo-600 text-center py-10">Extraindo texto do PDF local: ${file.name}...</p>`;
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let textoExtraido = "";
+
+        for (let i = 1; i <= Math.min(pdf.numPages, 30); i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          textoExtraido += content.items.map(item => item.str).join(" ") + "\n";
+        }
+
+        corpo.innerHTML = `
+          <div class="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg font-sans text-xs">
+            <strong>✅ PDF Extraído (${pdf.numPages} pág.):</strong> ${file.name}
+          </div>
+          <pre class="whitespace-pre-wrap font-sans text-slate-800 leading-relaxed">${textoExtraido.slice(0, 5000)}...\n\n[Prévia limitada]</pre>
+        `;
+      } catch (err) {
+        corpo.innerHTML = `<p class="text-red-500 text-center py-10 font-sans">Não foi possível ler o arquivo PDF.</p>`;
+      }
+    }
+
+    document.getElementById('btn-anterior').addEventListener('click', () => { if (paginaAtual > 1) buscarLicitacoes(paginaAtual - 1); });
+    document.getElementById('btn-proximo').addEventListener('click', () => { if (paginaAtual < totalPaginas) buscarLicitacoes(paginaAtual + 1); });
+
+    checarSessao();
+    lucide.createIcons();
+  </script>
+</body>
+</html>
