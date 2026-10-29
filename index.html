@@ -406,9 +406,28 @@
         if (modoValor === 'unitario_item') valorExibicao = valUnitario;
         else if (modoValor === 'total_edital') valorExibicao = valTotalCompra;
 
-        // URL Oficial PNCP
         const urlPncpOficial = `https://pncp.gov.br/app/editais/${item.cnpj_orgao}/${item.ano}/${item.sequencial}`;
-        const nomePortalExibicao = item.portal_nome || 'Portal de Origem';
+        const portalNome = item.portal_nome || 'Portal de Origem';
+        
+        // Constrói os links dinâmicos para portais conhecidos (Compras.gov / BNC)
+        let btnPortalOrigem = '';
+        if (portalNome.toLowerCase().includes('compras.gov')) {
+          const uasg = String(item.uasg || '').padStart(6, '0');
+          const numEdital = String(item.numero_compra || '').replace(/\D/g, '');
+          const urlComprasGov = `https://www.comprasnet.gov.br/consultalicitacoes/ConsLicitacao_Detalhes.asp?coduasg=${uasg}&numprp=${numEdital}`;
+          
+          btnPortalOrigem = `
+            <a href="${urlComprasGov}" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow flex items-center gap-1.5 transition-colors">
+              <i data-lucide="globe" class="w-4 h-4"></i> Abrir no Compras.gov.br
+            </a>
+          `;
+        } else if (portalNome.toLowerCase().includes('bnc')) {
+          btnPortalOrigem = `
+            <a href="https://bnc.org.br/" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow flex items-center gap-1.5 transition-colors">
+              <i data-lucide="globe" class="w-4 h-4"></i> Abrir no Portal BNC
+            </a>
+          `;
+        }
 
         return `
           <tr class="hover:bg-slate-50 border-b border-slate-100 align-top">
@@ -420,7 +439,7 @@
             <td class="py-4 px-4 font-semibold text-slate-900 max-w-[200px] break-words">
               ${item.orgao_nome} 
               <span class="inline-block bg-slate-100 text-[10px] font-bold px-1.5 py-0.5 rounded text-slate-700 ml-1">${item.uf}</span>
-              <span class="block text-[10px] text-blue-600 font-bold mt-1">🌐 Portal: ${nomePortalExibicao}</span>
+              <span class="block text-[10px] text-blue-600 font-bold mt-1">🌐 Portal: ${portalNome}</span>
             </td>
             <td class="py-4 px-4 text-xs font-medium text-slate-700 whitespace-nowrap">
               <span class="font-bold text-slate-900">Edital: ${item.numero_compra || item.sequencial}</span>
@@ -450,7 +469,7 @@
                   <p class="font-bold text-slate-900 border-b pb-1 flex items-center gap-1"><i data-lucide="info" class="w-3.5 h-3.5 text-blue-600"></i> Informações do Órgão</p>
                   <p><strong>CNPJ do Órgão:</strong> ${item.cnpj_orgao || 'Não informado'}</p>
                   <p><strong>UASG / Código Unidade:</strong> <span class="text-blue-600 font-bold">${item.uasg || 'Não informado'}</span></p>
-                  <p><strong>Portal Oficial:</strong> ${nomePortalExibicao}</p>
+                  <p><strong>Portal Oficial:</strong> ${portalNome}</p>
                 </div>
                 <div class="space-y-1.5">
                   <p class="font-bold text-slate-900 border-b pb-1 flex items-center gap-1"><i data-lucide="tag" class="w-3.5 h-3.5 text-emerald-600"></i> Detalhes do Edital</p>
@@ -466,11 +485,11 @@
                 </div>
               </div>
 
-              <!-- BOTÕES DE REDIRECIONAMENTO -->
               <div class="mt-3 flex flex-wrap gap-3">
                 <a href="${urlPncpOficial}" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow flex items-center gap-1.5 transition-colors">
-                  <i data-lucide="external-link" class="w-4 h-4"></i> Abrir no PNCP Oficial (Com acesso direto ao Portal de Origem)
+                  <i data-lucide="external-link" class="w-4 h-4"></i> Abrir Edital no PNCP
                 </a>
+                ${btnPortalOrigem}
               </div>
 
               <div class="mt-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
@@ -483,16 +502,15 @@
       }).join('');
       lucide.createIcons();
     }
-
     async function abrirModalAnexos(cnpj, ano, seq) {
       document.getElementById('modal-anexos').classList.remove('hidden'); 
-      document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Buscando documentos oficiais no PNCP...</p>`;
+      document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Carregando documentos oficiais...</p>`;
       
       let htmlConteudo = `
         <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between gap-3 mb-4">
           <div>
-            <span class="text-xs font-bold text-blue-900 block">🌐 Acessar no PNCP Oficial</span>
-            <span class="text-[10px] text-blue-700">Visualizar a compra e arquivos diretamente no Portal Nacional.</span>
+            <span class="text-xs font-bold text-blue-900 block">🌐 Página do Edital no PNCP</span>
+            <span class="text-[10px] text-blue-700">Verifique os documentos e atalhos de origem diretamente no portal.</span>
           </div>
           <a href="https://pncp.gov.br/app/editais/${cnpj}/${ano}/${seq}" target="_blank" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Abrir PNCP</a>
         </div>
@@ -504,21 +522,20 @@
         const arquivos = data.arquivos || [];
 
         if (arquivos.length === 0) {
-          const msgAviso = data.mensagem || "Nenhum arquivo PDF direto listado na API deste edital.";
           htmlConteudo += `
             <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-center space-y-2">
-              <p class="text-xs font-bold text-amber-800">${msgAviso}</p>
-              <p class="text-[11px] text-amber-700">Clique no botão azul acima para visualizar e baixar os arquivos diretamente na página do PNCP.</p>
+              <p class="text-xs font-bold text-amber-800">Nenhum arquivo listado via API</p>
+              <p class="text-[11px] text-amber-700">Acesse a página do PNCP pelo botão azul acima para baixar diretamente.</p>
             </div>
           `;
         } else {
           htmlConteudo += arquivos.map(arq => `
             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3 mb-2">
               <div>
-                <span class="text-xs font-semibold text-slate-800 block">${arq.titulo || arq.nomeArquivo || 'Documento Oficial'}</span>
-                <span class="text-[10px] text-slate-400">Tipo: ${arq.tipoDocumentoNome || 'PDF'}</span>
+                <span class="text-xs font-semibold text-slate-800 block">${arq.titulo}</span>
+                <span class="text-[10px] text-slate-400">Tipo: ${arq.tipoDocumentoNome}</span>
               </div>
-              <a href="${arq.url}" target="_blank" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs shadow flex items-center gap-1">
+              <a href="${arq.url}" target="_blank" download class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs shadow flex items-center gap-1">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i> Baixar PDF
               </a>
             </div>
@@ -528,7 +545,7 @@
         document.getElementById('lista-anexos-corpo').innerHTML = htmlConteudo;
         lucide.createIcons();
       } catch (e) {
-        document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar modal de arquivos.</p>`;
+        document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao buscar anexos.</p>`;
       }
     }
 
