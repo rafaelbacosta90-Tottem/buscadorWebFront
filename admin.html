@@ -5,76 +5,144 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Hub Licitações</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800">
-  <header class="bg-slate-900 text-white p-4 flex justify-between items-center">
-    <div class="font-bold text-lg">ADMIN - Painel de Controle</div>
-    <div class="flex gap-4"><a href="index.html" class="text-blue-400 font-bold">Voltar ao Buscador</a><button onclick="sair()" class="text-red-400 font-bold">Sair</button></div>
+  
+  <header class="bg-slate-900 text-white p-4 flex justify-between items-center shadow-lg">
+    <div class="font-bold text-lg flex items-center gap-2"><i data-lucide="shield" class="w-5 h-5 text-amber-400"></i> Painel Administrativo</div>
+    <div class="flex gap-4">
+      <a href="index.html" class="text-blue-400 font-bold hover:text-blue-300 text-sm flex items-center gap-1"><i data-lucide="search" class="w-4 h-4"></i> Buscador</a>
+      <button onclick="sair()" class="text-red-400 font-bold hover:text-red-300 text-sm flex items-center gap-1"><i data-lucide="log-out" class="w-4 h-4"></i> Sair</button>
+    </div>
   </header>
 
   <main class="max-w-6xl mx-auto p-6 space-y-8">
-    <div class="bg-white p-6 rounded-xl border shadow">
-      <div class="flex justify-between items-center mb-4"><h2 class="font-bold text-xl">Usuários e Licenças</h2><button onclick="document.getElementById('modal-usuario').classList.remove('hidden')" class="bg-blue-600 text-white px-4 py-2 rounded font-bold text-sm">Novo Usuário</button></div>
-      <table class="w-full text-left text-sm"><thead class="bg-slate-100"><tr><th class="p-3">Nome</th><th class="p-3">Email</th><th class="p-3">Empresa</th><th class="p-3">Ações</th></tr></thead><tbody id="tb-users"></tbody></table>
+    
+    <!-- GESTÃO DE USUÁRIOS -->
+    <div class="bg-white p-6 rounded-2xl border shadow-sm">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h2 class="font-bold text-xl text-slate-800">Usuários e Acessos</h2>
+          <p class="text-xs text-slate-500">Gerenciamento de contas, permissões e vinculação empresarial.</p>
+        </div>
+        <button onclick="document.getElementById('modal-usuario').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow">Novo Usuário</button>
+      </div>
+      
+      <div class="overflow-x-auto rounded-xl border">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-100 text-slate-600"><tr><th class="p-4 font-bold">Nome</th><th class="p-4 font-bold">Email</th><th class="p-4 font-bold">Empresa (CNPJ)</th><th class="p-4 font-bold text-center">Ações</th></tr></thead>
+          <tbody id="tb-users" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="bg-white p-6 rounded-xl border shadow space-y-4">
-      <h2 class="font-bold text-xl">Robô de Sincronização (PNCP)</h2>
-      <div class="flex gap-4 items-center">
-        <button onclick="syncStart()" class="bg-indigo-600 text-white px-4 py-2 rounded font-bold">Forçar Varredura Manual</button>
-        <button onclick="syncStop()" class="bg-red-600 text-white px-4 py-2 rounded font-bold">Parar Sincronização</button>
+    <!-- ROBÔ PNCP -->
+    <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-6">
+      <div>
+        <h2 class="font-bold text-xl text-slate-800 flex items-center gap-2"><i data-lucide="bot" class="text-indigo-600 w-6 h-6"></i> Robô de Sincronização (PNCP)</h2>
+        <p class="text-xs text-slate-500">Painel de controle do Crawler oficial do Portal Nacional de Contratações Públicas.</p>
       </div>
-      <div id="sync-status" class="p-4 bg-slate-900 text-green-400 font-mono text-sm rounded hidden"></div>
       
-      <div class="pt-4 border-t mt-4 grid grid-cols-3 gap-4">
-        <div><label class="block text-xs font-bold">Agendamento Ativo</label><select id="ag-ativo" class="border p-2 rounded w-full"><option value="true">Sim</option><option value="false">Não</option></select></div>
-        <div><label class="block text-xs font-bold">Intervalo (Minutos)</label><input type="number" id="ag-min" class="border p-2 rounded w-full"></div>
-        <div><label class="block text-xs font-bold">Dias Retroativos</label><input type="number" id="ag-dias" class="border p-2 rounded w-full"></div>
-        <button onclick="salvarAg()" class="col-span-3 bg-slate-800 text-white p-2 rounded font-bold">Salvar Configuração Automática</button>
+      <div class="flex gap-4 items-center">
+        <button onclick="syncStart()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-bold shadow flex gap-2 items-center"><i data-lucide="play" class="w-4 h-4"></i> Forçar Varredura</button>
+        <button onclick="syncStop()" class="bg-red-100 hover:bg-red-200 text-red-700 px-5 py-2.5 rounded-lg font-bold flex gap-2 items-center"><i data-lucide="square" class="w-4 h-4"></i> Parar Sincronização</button>
+      </div>
+
+      <!-- STATUS DA VARREDURA -->
+      <div id="painel-progresso" class="hidden p-5 bg-slate-900 text-white rounded-2xl space-y-4 shadow-inner">
+        <div class="flex items-center justify-between">
+          <span id="sync-status-msg" class="text-sm font-bold text-amber-400 flex items-center gap-2"><i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Executando...</span>
+          <span class="text-xs font-bold bg-slate-800 px-3 py-1 rounded text-slate-300">Itens Lidos e Salvos: <span id="sync-qtd" class="text-emerald-400 text-sm">0</span></span>
+        </div>
+        
+        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+          <div id="sync-bar" class="bg-indigo-500 h-2 rounded-full transition-all" style="width: 100%"></div>
+        </div>
+        
+        <div>
+          <button onclick="toggleLogs()" class="text-xs font-bold text-indigo-300 hover:text-indigo-200 flex items-center gap-1 mb-2"><i data-lucide="terminal" class="w-3.5 h-3.5"></i> Mostrar/Ocultar Logs Detalhados</button>
+          <div id="sync-logs-container" class="hidden h-48 overflow-y-auto bg-black/50 p-3 rounded-lg border border-slate-700 font-mono text-[10px] text-slate-300 space-y-1">
+            <!-- Logs aparecem aqui -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- CONFIGURAÇÃO AUTOMÁTICA -->
+      <div class="pt-6 border-t mt-4">
+        <h3 class="font-bold text-sm text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="clock" class="text-slate-500 w-4 h-4"></i> Agendamento Automático (Background)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">Agendamento Ativo</label><select id="ag-ativo" class="border bg-slate-50 p-2 rounded-lg w-full text-sm font-semibold"><option value="true">Sim, rodar automático</option><option value="false">Não, apenas manual</option></select></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">Intervalo (Minutos)</label><input type="number" id="ag-min" class="border bg-slate-50 p-2 rounded-lg w-full text-sm font-semibold"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">Dias Retroativos para Buscar</label><input type="number" id="ag-dias" class="border bg-slate-50 p-2 rounded-lg w-full text-sm font-semibold"></div>
+          <button onclick="salvarAg()" class="md:col-span-3 bg-slate-800 hover:bg-slate-700 text-white p-3 rounded-lg font-bold shadow text-sm">Salvar Configurações do Agendador</button>
+        </div>
       </div>
     </div>
   </main>
 
-  <div id="modal-usuario" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4">
-    <div class="bg-white p-6 rounded-xl w-full max-w-sm space-y-3">
-      <h3 class="font-bold text-lg border-b pb-2">Cadastrar Usuário</h3>
-      <input type="text" id="nu-razao" placeholder="Razão Social" class="w-full border p-2 text-sm rounded">
-      <input type="text" id="nu-cnpj" placeholder="CNPJ (só números)" class="w-full border p-2 text-sm rounded">
-      <input type="text" id="nu-nome" placeholder="Nome Completo" class="w-full border p-2 text-sm rounded">
-      <input type="email" id="nu-email" placeholder="E-mail" class="w-full border p-2 text-sm rounded">
-      <input type="password" id="nu-senha" placeholder="Senha" class="w-full border p-2 text-sm rounded">
-      <label class="flex items-center gap-2 text-sm font-bold"><input type="checkbox" id="nu-admin"> Administrador</label>
-      <div class="flex justify-end gap-2 pt-2"><button onclick="document.getElementById('modal-usuario').classList.add('hidden')" class="px-4 py-2 bg-slate-200 rounded text-sm font-bold">Cancelar</button><button onclick="addUsr()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-bold">Salvar</button></div>
+  <!-- MODAL USUÁRIO -->
+  <div id="modal-usuario" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50">
+    <div class="bg-white p-6 rounded-2xl w-full max-w-sm space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-lg text-slate-800">Cadastrar Usuário</h3><button onclick="document.getElementById('modal-usuario').classList.add('hidden')"><i data-lucide="x" class="text-slate-400 w-5 h-5"></i></button></div>
+      <input type="text" id="nu-razao" placeholder="Razão Social" class="w-full border bg-slate-50 p-2.5 text-sm rounded-lg">
+      <input type="text" id="nu-cnpj" placeholder="CNPJ (só números)" class="w-full border bg-slate-50 p-2.5 text-sm rounded-lg">
+      <input type="text" id="nu-nome" placeholder="Nome Completo" class="w-full border bg-slate-50 p-2.5 text-sm rounded-lg">
+      <input type="email" id="nu-email" placeholder="E-mail" class="w-full border bg-slate-50 p-2.5 text-sm rounded-lg">
+      <input type="password" id="nu-senha" placeholder="Senha" class="w-full border bg-slate-50 p-2.5 text-sm rounded-lg">
+      <label class="flex items-center gap-2 text-sm font-bold text-slate-700"><input type="checkbox" id="nu-admin" class="w-4 h-4"> Conta Administrador?</label>
+      <button onclick="addUsr()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow mt-2">Finalizar Cadastro</button>
     </div>
   </div>
 
   <script>
     const API = "https://buscador-web-6i6s.onrender.com";
-    let user = JSON.parse(localStorage.getItem('s'));
+    let user = JSON.parse(localStorage.getItem('usuario_sessao'));
     if(!user || !user.is_admin) { alert("Acesso restrito"); window.location.href="index.html"; }
 
-    function sair() { localStorage.removeItem('s'); window.location.href="index.html"; }
+    function sair() { localStorage.removeItem('usuario_sessao'); window.location.href="index.html"; }
 
     async function loadU() {
       const r = await fetch(`${API}/api/admin/usuarios?admin_id=${user.user_id}`); const d = await r.json();
-      document.getElementById('tb-users').innerHTML = d.usuarios.map(u=>`<tr class="border-b text-sm"><td class="p-3">${u.nome_completo}</td><td class="p-3">${u.email}</td><td class="p-3">${u.empresas?u.empresas.razao_social:'-'}</td><td class="p-3"><button onclick="delU('${u.id}')" class="text-red-500 font-bold">Excluir</button></td></tr>`).join('');
+      document.getElementById('tb-users').innerHTML = d.usuarios.map(u=>`<tr class="hover:bg-slate-50 text-xs"><td class="p-4 font-bold text-slate-800">${u.nome_completo}</td><td class="p-4 text-slate-600">${u.email}</td><td class="p-4">${u.empresas?u.empresas.razao_social:'-'} <br><span class="text-slate-400">${u.empresas?u.empresas.cnpj:''}</span></td><td class="p-4 text-center"><button onclick="delU('${u.id}')" class="text-red-600 font-bold hover:bg-red-50 p-1.5 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`).join('');
+      lucide.createIcons();
     }
 
     async function addUsr() {
       await fetch(`${API}/api/admin/usuarios?admin_id=${user.user_id}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({razao_social:document.getElementById('nu-razao').value, cnpj:document.getElementById('nu-cnpj').value, nome_completo:document.getElementById('nu-nome').value, email:document.getElementById('nu-email').value, senha:document.getElementById('nu-senha').value, is_admin:document.getElementById('nu-admin').checked})});
       document.getElementById('modal-usuario').classList.add('hidden'); loadU();
     }
-    async function delU(id) { if(confirm("Certeza?")) { await fetch(`${API}/api/admin/usuarios/${id}?admin_id=${user.user_id}`, {method:'DELETE'}); loadU(); } }
+    async function delU(id) { if(confirm("Certeza absoluta?")) { await fetch(`${API}/api/admin/usuarios/${id}?admin_id=${user.user_id}`, {method:'DELETE'}); loadU(); } }
 
-    async function syncStart() { await fetch(`${API}/api/admin/sincronizar?admin_id=${user.user_id}`, {method:'POST'}); checkSync(); }
+    function toggleLogs() { document.getElementById('sync-logs-container').classList.toggle('hidden'); }
+
+    async function syncStart() { await fetch(`${API}/api/admin/sincronizar?admin_id=${user.user_id}`, {method:'POST'}); document.getElementById('painel-progresso').classList.remove('hidden'); checkSync(); }
     async function syncStop() { await fetch(`${API}/api/admin/parar-sincronizacao?admin_id=${user.user_id}`, {method:'POST'}); }
     
     function checkSync() {
       setInterval(async()=>{
-        const r = await fetch(`${API}/api/admin/sincronizacao-status?admin_id=${user.user_id}`); const d = await r.json();
-        const bx = document.getElementById('sync-status');
-        if(d.em_andamento || d.mensagem.includes('Finalizado')) { bx.classList.remove('hidden'); bx.innerText = d.mensagem; }
-      }, 3000);
+        try {
+          const r = await fetch(`${API}/api/admin/sincronizacao-status?admin_id=${user.user_id}`); const d = await r.json();
+          const bx = document.getElementById('painel-progresso');
+          
+          if(d.em_andamento || d.mensagem.includes('Finalizado')) { 
+            bx.classList.remove('hidden'); 
+            document.getElementById('sync-status-msg').innerHTML = d.em_andamento ? `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> ${d.mensagem}` : `✅ ${d.mensagem}`;
+            document.getElementById('sync-qtd').innerText = d.novos_inseridos || 0;
+            
+            if(d.logs && d.logs.length > 0) {
+               document.getElementById('sync-logs-container').innerHTML = d.logs.map(log => {
+                   let cor = "text-slate-300";
+                   if(log.includes("✅")) cor = "text-emerald-400 font-bold";
+                   if(log.includes("❌")) cor = "text-red-400 font-bold";
+                   if(log.includes("⚠️")) cor = "text-amber-400";
+                   return `<div class="${cor}">${log}</div>`;
+               }).join('');
+            }
+            lucide.createIcons();
+          }
+        } catch(e) {}
+      }, 2000);
     }
 
     async function loadAg() {
@@ -86,7 +154,7 @@
       alert("Configuração Salva!");
     }
 
-    loadU(); loadAg(); checkSync();
+    loadU(); loadAg(); checkSync(); lucide.createIcons();
   </script>
 </body>
 </html>
