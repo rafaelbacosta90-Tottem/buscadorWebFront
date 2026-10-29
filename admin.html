@@ -140,12 +140,15 @@
         </div>
       </div>
 
-      <!-- DISPARO MANUAL DE VARREDURA -->
-      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-          <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> Execução Manual de Varredura
-        </h3>
-        <p class="text-xs text-slate-500">Force a execução do robô para varrer o PNCP imediatamente.</p>
+      <!-- DISPARO MANUAL DE VARREDURA & BARRA DE PROGRESSO -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> Execução Manual de Varredura
+          </h3>
+          <p class="text-xs text-slate-500">Dispare o robô para varrer o PNCP imediatamente com acompanhamento do progresso em tempo real.</p>
+        </div>
+
         <div class="flex gap-3">
           <button onclick="dispararSincronizacao()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow flex items-center gap-2">
             <i data-lucide="play" class="w-4 h-4"></i> Iniciar Varredura Manual
@@ -154,6 +157,29 @@
             <i data-lucide="square" class="w-4 h-4"></i> Parar Robô / Resetar Trava
           </button>
         </div>
+
+        <!-- PAINEL VISUAL DE PROGRESSO DA VARREDURA -->
+        <div id="painel-progresso" class="hidden p-5 bg-slate-900 text-white rounded-2xl space-y-3">
+          <div class="flex items-center justify-between">
+            <span id="status-varredura-texto" class="text-xs font-bold text-amber-400 flex items-center gap-2">
+              <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Executando varredura no PNCP...
+            </span>
+            <span id="porcentagem-progresso" class="text-xs font-extrabold text-blue-400">0%</span>
+          </div>
+
+          <!-- BARRA DE PROGRESSO -->
+          <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+            <div id="barra-progresso-fill" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-slate-300 font-mono pt-1">
+            <div>Editais Encontrados: <strong id="lbl-editais-encontrados" class="text-white">0</strong></div>
+            <div>Novos Inseridos: <strong id="lbl-novos-inseridos" class="text-emerald-400">0</strong></div>
+            <div>Página Atual: <strong id="lbl-pagina-exec" class="text-amber-300">0 / 0</strong></div>
+            <div>Tempo Decorrido: <strong id="lbl-tempo-decorrido" class="text-blue-300">0s</strong></div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -255,6 +281,7 @@
   <script>
     const API_URL = "https://buscador-web-6i6s.onrender.com";
     let usuarioAtual = null;
+    let timerPollingStatus = null;
 
     // Gestão de Usuários
     let listaUsuariosGlobais = [];
@@ -272,12 +299,14 @@
           return;
         }
         carregarUsuariosAdmin();
+        iniciarPollingStatusVarredura();
       } else {
         window.location.href = "index.html";
       }
     }
 
     function logoutAdmin() {
+      if (timerPollingStatus) clearInterval(timerPollingStatus);
       localStorage.removeItem('usuario_sessao');
       window.location.href = "index.html";
     }
@@ -499,6 +528,53 @@
       }
     }
 
+    // --- BARRA DE PROGRESSO & POLLING DE STATUS DA VARREDURA ---
+    function iniciarPollingStatusVarredura() {
+      if (timerPollingStatus) clearInterval(timerPollingStatus);
+      timerPollingStatus = setInterval(consultarStatusVarredura, 2000);
+    }
+
+    async function consultarStatusVarredura() {
+      if (!usuarioAtual) return;
+      try {
+        const res = await fetch(`${API_URL}/api/admin/sincronizacao-status?admin_id=${usuarioAtual.user_id}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const painel = document.getElementById('painel-progresso');
+
+        if (data.em_andamento) {
+          painel.classList.remove('hidden');
+
+          const pct = Math.min(Math.round(data.progresso_pct || 0), 100);
+          document.getElementById('porcentagem-progresso').textContent = `${pct}%`;
+          document.getElementById('barra-progresso-fill').style.width = `${pct}%`;
+
+          document.getElementById('lbl-editais-encontrados').textContent = data.editais_encontrados || 0;
+          document.getElementById('lbl-novos-inseridos').textContent = data.novos_inseridos || 0;
+          document.getElementById('lbl-pagina-exec').textContent = `${data.pagina_atual || 1} / ${data.total_paginas || 1}`;
+          document.getElementById('lbl-tempo-decorrido').textContent = `${data.tempo_decorrido_segundos || 0}s`;
+
+          document.getElementById('status-varredura-texto').innerHTML = `
+            <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+            ${data.mensagem || 'Executando varredura no PNCP...'}
+          `;
+          lucide.createIcons();
+        } else {
+          if (!painel.classList.contains('hidden') && data.mensagem === "Concluído") {
+            document.getElementById('barra-progresso-fill').style.width = '100%';
+            document.getElementById('porcentagem-progresso').textContent = '100%';
+            document.getElementById('status-varredura-texto').innerHTML = `✅ Varredura concluída com sucesso!`;
+            setTimeout(() => { painel.classList.add('hidden'); }, 5000);
+          } else {
+            painel.classList.add('hidden');
+          }
+        }
+      } catch (e) {
+        console.error("Erro no polling de status:", e);
+      }
+    }
+
     // --- ABA CONFIGURADOR AUTOMÁTICO DE BUSCAS ---
     async function salvarConfiguracaoAgendamento() {
       const payload = {
@@ -530,12 +606,14 @@
         const data = await res.json();
         
         if (res.ok) {
-          alert(data.message || "Varredura manual iniciada!");
+          document.getElementById('painel-progresso').classList.remove('hidden');
+          consultarStatusVarredura();
         } else {
           if (confirm(`${data.detail}\n\nDeseja forçar o reinício da sincronização?`)) {
             const resForcar = await fetch(`${API_URL}/api/admin/sincronizar?admin_id=${usuarioAtual.user_id}&forcar=true`, { method: 'POST' });
             const dataForcar = await resForcar.json();
-            alert(dataForcar.message || "Varredura forçada com sucesso!");
+            document.getElementById('painel-progresso').classList.remove('hidden');
+            consultarStatusVarredura();
           }
         }
       } catch (e) {
@@ -548,6 +626,7 @@
         const res = await fetch(`${API_URL}/api/admin/parar-sincronizacao?admin_id=${usuarioAtual.user_id}`, { method: 'POST' });
         const data = await res.json();
         alert(data.message || "Solicitação de parada enviada.");
+        consultarStatusVarredura();
       } catch (e) {
         alert("Erro ao enviar solicitação de parada.");
       }
