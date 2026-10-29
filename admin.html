@@ -3,637 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Administrativo - Hub Licitações</title>
+  <title>Admin - Hub Licitações</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col">
-
-  <!-- CABEÇALHO DO PAINEL ADMIN -->
-  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="bg-amber-500 text-slate-900 p-2 rounded-lg font-bold text-lg">ADMIN</div>
-        <span class="font-semibold text-lg tracking-wide">Painel Administrativo</span>
-      </div>
-      <div class="flex items-center space-x-4">
-        <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar ao Buscador
-        </a>
-        <button onclick="logoutAdmin()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow">Sair</button>
-      </div>
-    </div>
+<body class="bg-slate-50 font-sans text-slate-800">
+  <header class="bg-slate-900 text-white p-4 flex justify-between items-center">
+    <div class="font-bold text-lg">ADMIN - Painel de Controle</div>
+    <div class="flex gap-4"><a href="index.html" class="text-blue-400 font-bold">Voltar ao Buscador</a><button onclick="sair()" class="text-red-400 font-bold">Sair</button></div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-6 py-6 space-y-6 flex-1 w-full">
-
-    <!-- NAVEGAÇÃO POR ABAS -->
-    <div class="flex border-b border-slate-200 space-x-4">
-      <button onclick="trocarAba('aba-usuarios')" id="btn-aba-usuarios" class="py-2.5 px-4 border-b-2 border-blue-600 font-bold text-sm text-blue-600 flex items-center gap-2">
-        <i data-lucide="users" class="w-4 h-4"></i> Gerenciar Usuários
-      </button>
-      <button onclick="trocarAba('aba-agendamento')" id="btn-aba-agendamento" class="py-2.5 px-4 border-b-2 border-transparent font-bold text-sm text-slate-500 hover:text-slate-700 flex items-center gap-2">
-        <i data-lucide="clock" class="w-4 h-4"></i> Configurador Automático de Buscas
-      </button>
+  <main class="max-w-6xl mx-auto p-6 space-y-8">
+    <div class="bg-white p-6 rounded-xl border shadow">
+      <div class="flex justify-between items-center mb-4"><h2 class="font-bold text-xl">Usuários e Licenças</h2><button onclick="document.getElementById('modal-usuario').classList.remove('hidden')" class="bg-blue-600 text-white px-4 py-2 rounded font-bold text-sm">Novo Usuário</button></div>
+      <table class="w-full text-left text-sm"><thead class="bg-slate-100"><tr><th class="p-3">Nome</th><th class="p-3">Email</th><th class="p-3">Empresa</th><th class="p-3">Ações</th></tr></thead><tbody id="tb-users"></tbody></table>
     </div>
 
-    <!-- =================================================================== -->
-    <!-- ABA 1: GERENCIAR USUÁRIOS -->
-    <!-- =================================================================== -->
-    <div id="aba-usuarios" class="space-y-4">
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <h3 class="font-bold text-slate-800 text-base">Usuários Cadastrados</h3>
-          <p class="text-xs text-slate-500">Visualize, crie, edite senhas e altere permissões dos usuários.</p>
-        </div>
-        
-        <div class="flex items-center gap-2 w-full md:w-auto">
-          <!-- FILTRO POR NOME OU EMAIL -->
-          <div class="relative w-full md:w-64">
-            <input 
-              type="text" 
-              id="input-filtro-usuario" 
-              onkeyup="filtrarTabelaUsuarios()" 
-              placeholder="Buscar por nome ou e-mail..." 
-              class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2"></i>
-          </div>
-
-          <button onclick="abrirModalNovoUsuario()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg flex items-center gap-1 shrink-0 shadow">
-            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Novo Usuário
-          </button>
-
-          <button onclick="carregarUsuariosAdmin()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg flex items-center gap-1 shrink-0">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-          </button>
-        </div>
+    <div class="bg-white p-6 rounded-xl border shadow space-y-4">
+      <h2 class="font-bold text-xl">Robô de Sincronização (PNCP)</h2>
+      <div class="flex gap-4 items-center">
+        <button onclick="syncStart()" class="bg-indigo-600 text-white px-4 py-2 rounded font-bold">Forçar Varredura Manual</button>
+        <button onclick="syncStop()" class="bg-red-600 text-white px-4 py-2 rounded font-bold">Parar Sincronização</button>
       </div>
-
-      <!-- TABELA DE USUÁRIOS -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm border-collapse">
-            <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-xs">
-              <tr>
-                <th class="py-3 px-4">Nome</th>
-                <th class="py-3 px-4">E-mail</th>
-                <th class="py-3 px-4">Empresa / CNPJ</th>
-                <th class="py-3 px-4 text-center">Perfil</th>
-                <th class="py-3 px-4 text-center">Status</th>
-                <th class="py-3 px-4 text-center">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="tabela-usuarios-corpo" class="divide-y divide-slate-100 text-slate-700">
-              <tr><td colSpan="6" class="py-8 text-center text-slate-400">Carregando usuários...</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- RODAPÉ COM PAGINAÇÃO -->
-        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-          <span id="info-paginacao-usuarios" class="text-xs font-semibold text-slate-500">Exibindo 0-0 de 0 usuários</span>
-          <div class="flex gap-2">
-            <button id="btn-usr-prev" onclick="mudarPaginaUsuario(-1)" disabled class="px-3 py-1.5 bg-white border border-slate-200 text-xs font-bold rounded-lg disabled:opacity-50 hover:bg-slate-100">← Anterior</button>
-            <span id="label-pagina-atual" class="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-200/60 rounded-lg flex items-center">Página 1</span>
-            <button id="btn-usr-next" onclick="mudarPaginaUsuario(1)" disabled class="px-3 py-1.5 bg-white border border-slate-200 text-xs font-bold rounded-lg disabled:opacity-50 hover:bg-slate-100">Próximo →</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- =================================================================== -->
-    <!-- ABA 2: CONFIGURADOR AUTOMÁTICO DE BUSCAS / ROBÔ PNCP -->
-    <!-- =================================================================== -->
-    <div id="aba-agendamento" class="hidden space-y-6">
+      <div id="sync-status" class="p-4 bg-slate-900 text-green-400 font-mono text-sm rounded hidden"></div>
       
-      <!-- CONFIGURAÇÃO DE AGENDAMENTO AUTOMÁTICO -->
-      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div>
-            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-              <i data-lucide="clock" class="w-5 h-5 text-blue-600"></i> Agendamento de Sincronização Automática
-            </h3>
-            <p class="text-xs text-slate-500">Defina o intervalo e o período retroativo para que o robô busque novos editais periodicamente.</p>
-          </div>
-          <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer bg-slate-50 px-3 py-1.5 border rounded-lg">
-            <input type="checkbox" id="chk-agendamento-ativo" class="rounded border-slate-300 text-blue-600 w-4 h-4">
-            Agendamento Ativo?
-          </label>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Intervalo de Varredura (Minutos):</label>
-            <input type="number" id="input-intervalo-minutos" min="5" value="60" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-sm font-bold">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Dias Retroativos para Buscar:</label>
-            <input type="number" id="input-dias-retroativos" min="1" max="30" value="2" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-sm font-bold">
-          </div>
-        </div>
-
-        <div class="text-right pt-2">
-          <button onclick="salvarConfiguracaoAgendamento()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow flex items-center gap-1 ml-auto">
-            <i data-lucide="save" class="w-4 h-4"></i> Salvar Configuração Automática
-          </button>
-        </div>
+      <div class="pt-4 border-t mt-4 grid grid-cols-3 gap-4">
+        <div><label class="block text-xs font-bold">Agendamento Ativo</label><select id="ag-ativo" class="border p-2 rounded w-full"><option value="true">Sim</option><option value="false">Não</option></select></div>
+        <div><label class="block text-xs font-bold">Intervalo (Minutos)</label><input type="number" id="ag-min" class="border p-2 rounded w-full"></div>
+        <div><label class="block text-xs font-bold">Dias Retroativos</label><input type="number" id="ag-dias" class="border p-2 rounded w-full"></div>
+        <button onclick="salvarAg()" class="col-span-3 bg-slate-800 text-white p-2 rounded font-bold">Salvar Configuração Automática</button>
       </div>
-
-      <!-- DISPARO MANUAL DE VARREDURA & BARRA DE PROGRESSO -->
-      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-        <div>
-          <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> Execução Manual de Varredura
-          </h3>
-          <p class="text-xs text-slate-500">Dispare o robô para varrer o PNCP imediatamente com acompanhamento do progresso em tempo real.</p>
-        </div>
-
-        <div class="flex gap-3">
-          <button onclick="dispararSincronizacao()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow flex items-center gap-2">
-            <i data-lucide="play" class="w-4 h-4"></i> Iniciar Varredura Manual
-          </button>
-          <button onclick="pararSincronizacao()" class="px-4 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-xl text-xs flex items-center gap-2">
-            <i data-lucide="square" class="w-4 h-4"></i> Parar Robô / Resetar Trava
-          </button>
-        </div>
-
-        <!-- PAINEL VISUAL DE PROGRESSO DA VARREDURA -->
-        <div id="painel-progresso" class="hidden p-5 bg-slate-900 text-white rounded-2xl space-y-3">
-          <div class="flex items-center justify-between">
-            <span id="status-varredura-texto" class="text-xs font-bold text-amber-400 flex items-center gap-2">
-              <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Executando varredura no PNCP...
-            </span>
-            <span id="porcentagem-progresso" class="text-xs font-extrabold text-blue-400">0%</span>
-          </div>
-
-          <!-- BARRA DE PROGRESSO -->
-          <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
-            <div id="barra-progresso-fill" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
-          </div>
-
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-slate-300 font-mono pt-1">
-            <div>Editais Encontrados: <strong id="lbl-editais-encontrados" class="text-white">0</strong></div>
-            <div>Novos Inseridos: <strong id="lbl-novos-inseridos" class="text-emerald-400">0</strong></div>
-            <div>Página Atual: <strong id="lbl-pagina-exec" class="text-amber-300">0 / 0</strong></div>
-            <div>Tempo Decorrido: <strong id="lbl-tempo-decorrido" class="text-blue-300">0s</strong></div>
-          </div>
-        </div>
-
-      </div>
-
     </div>
-
   </main>
 
-  <!-- MODAL DE CADASTRO DE NOVO USUÁRIO -->
-  <div id="modal-novo-usuario" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
-      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
-        <h3 class="font-bold text-sm flex items-center gap-2"><i data-lucide="user-plus" class="w-4 h-4 text-blue-400"></i> Cadastrar Novo Usuário</h3>
-        <button onclick="document.getElementById('modal-novo-usuario').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <form id="form-novo-usuario" onsubmit="salvarNovoUsuario(event)" class="p-6 space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Razão Social da Empresa</label>
-          <input type="text" id="add-usr-razao" required placeholder="Ex: Minha Empresa LTDA" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">CNPJ da Empresa</label>
-          <input type="text" id="add-usr-cnpj" required placeholder="00.000.000/0000-00" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome Completo do Usuário</label>
-          <input type="text" id="add-usr-nome" required placeholder="Nome do responsável" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail de Acesso</label>
-          <input type="email" id="add-usr-email" required placeholder="usuario@email.com" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha de Acesso</label>
-          <input type="password" id="add-usr-senha" required placeholder="••••••••" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
-        </div>
-
-        <div class="flex items-center justify-between pt-2">
-          <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-            <input type="checkbox" id="add-usr-admin" class="rounded border-slate-300"> É Administrador?
-          </label>
-        </div>
-
-        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
-          <button type="button" onclick="document.getElementById('modal-novo-usuario').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">Cancelar</button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Criar Usuário</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL DE EDIÇÃO DE USUÁRIO -->
-  <div id="modal-editar-usuario" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
-      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
-        <h3 class="font-bold text-sm">Editar Usuário</h3>
-        <button onclick="document.getElementById('modal-editar-usuario').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <form id="form-editar-usuario" onsubmit="salvarEdicaoUsuario(event)" class="p-6 space-y-4">
-        <input type="hidden" id="edit-usr-id">
-        
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome Completo</label>
-          <input type="text" id="edit-usr-nome" required class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail</label>
-          <input type="email" id="edit-usr-email" required class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nova Senha (deixe em branco para manter a atual)</label>
-          <input type="password" id="edit-usr-senha" placeholder="••••••••" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
-        </div>
-
-        <div class="flex items-center justify-between pt-2">
-          <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-            <input type="checkbox" id="edit-usr-admin" class="rounded border-slate-300"> É Administrador?
-          </label>
-          
-          <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-            <input type="checkbox" id="edit-usr-ativo" class="rounded border-slate-300"> Conta Ativa?
-          </label>
-        </div>
-
-        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
-          <button type="button" onclick="document.getElementById('modal-editar-usuario').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">Cancelar</button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Salvar Alterações</button>
-        </div>
-      </form>
+  <div id="modal-usuario" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4">
+    <div class="bg-white p-6 rounded-xl w-full max-w-sm space-y-3">
+      <h3 class="font-bold text-lg border-b pb-2">Cadastrar Usuário</h3>
+      <input type="text" id="nu-razao" placeholder="Razão Social" class="w-full border p-2 text-sm rounded">
+      <input type="text" id="nu-cnpj" placeholder="CNPJ (só números)" class="w-full border p-2 text-sm rounded">
+      <input type="text" id="nu-nome" placeholder="Nome Completo" class="w-full border p-2 text-sm rounded">
+      <input type="email" id="nu-email" placeholder="E-mail" class="w-full border p-2 text-sm rounded">
+      <input type="password" id="nu-senha" placeholder="Senha" class="w-full border p-2 text-sm rounded">
+      <label class="flex items-center gap-2 text-sm font-bold"><input type="checkbox" id="nu-admin"> Administrador</label>
+      <div class="flex justify-end gap-2 pt-2"><button onclick="document.getElementById('modal-usuario').classList.add('hidden')" class="px-4 py-2 bg-slate-200 rounded text-sm font-bold">Cancelar</button><button onclick="addUsr()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-bold">Salvar</button></div>
     </div>
   </div>
 
   <script>
-    const API_URL = "https://buscador-web-6i6s.onrender.com";
-    let usuarioAtual = null;
-    let timerPollingStatus = null;
+    const API = "https://buscador-web-6i6s.onrender.com";
+    let user = JSON.parse(localStorage.getItem('s'));
+    if(!user || !user.is_admin) { alert("Acesso restrito"); window.location.href="index.html"; }
 
-    // Gestão de Usuários
-    let listaUsuariosGlobais = [];
-    let listaUsuariosFiltrados = [];
-    let paginaAtualUsuario = 1;
-    const itensPorPaginaUsuario = 10;
+    function sair() { localStorage.removeItem('s'); window.location.href="index.html"; }
 
-    function checarSessaoAdmin() {
-      const sessaoSalva = localStorage.getItem('usuario_sessao');
-      if (sessaoSalva) {
-        usuarioAtual = JSON.parse(sessaoSalva);
-        if (!usuarioAtual.is_admin) {
-          alert("Acesso negado. Apenas administradores podem acessar esta página.");
-          window.location.href = "index.html";
-          return;
-        }
-        carregarUsuariosAdmin();
-        iniciarPollingStatusVarredura();
-      } else {
-        window.location.href = "index.html";
-      }
+    async function loadU() {
+      const r = await fetch(`${API}/api/admin/usuarios?admin_id=${user.user_id}`); const d = await r.json();
+      document.getElementById('tb-users').innerHTML = d.usuarios.map(u=>`<tr class="border-b text-sm"><td class="p-3">${u.nome_completo}</td><td class="p-3">${u.email}</td><td class="p-3">${u.empresas?u.empresas.razao_social:'-'}</td><td class="p-3"><button onclick="delU('${u.id}')" class="text-red-500 font-bold">Excluir</button></td></tr>`).join('');
     }
 
-    function logoutAdmin() {
-      if (timerPollingStatus) clearInterval(timerPollingStatus);
-      localStorage.removeItem('usuario_sessao');
-      window.location.href = "index.html";
+    async function addUsr() {
+      await fetch(`${API}/api/admin/usuarios?admin_id=${user.user_id}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({razao_social:document.getElementById('nu-razao').value, cnpj:document.getElementById('nu-cnpj').value, nome_completo:document.getElementById('nu-nome').value, email:document.getElementById('nu-email').value, senha:document.getElementById('nu-senha').value, is_admin:document.getElementById('nu-admin').checked})});
+      document.getElementById('modal-usuario').classList.add('hidden'); loadU();
+    }
+    async function delU(id) { if(confirm("Certeza?")) { await fetch(`${API}/api/admin/usuarios/${id}?admin_id=${user.user_id}`, {method:'DELETE'}); loadU(); } }
+
+    async function syncStart() { await fetch(`${API}/api/admin/sincronizar?admin_id=${user.user_id}`, {method:'POST'}); checkSync(); }
+    async function syncStop() { await fetch(`${API}/api/admin/parar-sincronizacao?admin_id=${user.user_id}`, {method:'POST'}); }
+    
+    function checkSync() {
+      setInterval(async()=>{
+        const r = await fetch(`${API}/api/admin/sincronizacao-status?admin_id=${user.user_id}`); const d = await r.json();
+        const bx = document.getElementById('sync-status');
+        if(d.em_andamento || d.mensagem.includes('Finalizado')) { bx.classList.remove('hidden'); bx.innerText = d.mensagem; }
+      }, 3000);
     }
 
-    // --- NAVEGAÇÃO ENTRE ABAS ---
-    function trocarAba(nomeAba) {
-      document.getElementById('aba-usuarios').classList.add('hidden');
-      document.getElementById('aba-agendamento').classList.add('hidden');
-
-      document.getElementById('btn-aba-usuarios').classList.replace('border-blue-600', 'border-transparent');
-      document.getElementById('btn-aba-usuarios').classList.replace('text-blue-600', 'text-slate-500');
-
-      document.getElementById('btn-aba-agendamento').classList.replace('border-blue-600', 'border-transparent');
-      document.getElementById('btn-aba-agendamento').classList.replace('text-blue-600', 'text-slate-500');
-
-      document.getElementById(nomeAba).classList.remove('hidden');
-
-      if (nomeAba === 'aba-usuarios') {
-        document.getElementById('btn-aba-usuarios').classList.replace('border-transparent', 'border-blue-600');
-        document.getElementById('btn-aba-usuarios').classList.replace('text-slate-500', 'text-blue-600');
-        carregarUsuariosAdmin();
-      } else {
-        document.getElementById('btn-aba-agendamento').classList.replace('border-transparent', 'border-blue-600');
-        document.getElementById('btn-aba-agendamento').classList.replace('text-slate-500', 'text-blue-600');
-      }
+    async function loadAg() {
+      const r = await fetch(`${API}/api/admin/agendamento?admin_id=${user.user_id}`); const d = await r.json();
+      document.getElementById('ag-ativo').value = d.ativo ? "true" : "false"; document.getElementById('ag-min').value = d.intervalo_minutos; document.getElementById('ag-dias').value = d.dias_retroativos;
+    }
+    async function salvarAg() {
+      await fetch(`${API}/api/admin/agendamento?admin_id=${user.user_id}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ativo: document.getElementById('ag-ativo').value==="true", intervalo_minutos: parseInt(document.getElementById('ag-min').value), dias_retroativos: parseInt(document.getElementById('ag-dias').value)})});
+      alert("Configuração Salva!");
     }
 
-    // --- ABA GERENCIAR USUÁRIOS ---
-    async function carregarUsuariosAdmin() {
-      const corpo = document.getElementById('tabela-usuarios-corpo');
-      corpo.innerHTML = `<tr><td colSpan="6" class="py-8 text-center text-slate-400">Carregando usuários...</td></tr>`;
-
-      try {
-        const res = await fetch(`${API_URL}/api/admin/usuarios?admin_id=${usuarioAtual.user_id}`);
-        const data = await res.json();
-        listaUsuariosGlobais = data.usuarios || [];
-        listaUsuariosFiltrados = [...listaUsuariosGlobais];
-
-        document.getElementById('input-filtro-usuario').value = '';
-        paginaAtualUsuario = 1;
-        renderizarTabelaUsuariosComPaginacao();
-      } catch (e) {
-        corpo.innerHTML = `<tr><td colSpan="6" class="py-8 text-center text-red-500">Erro ao carregar lista de usuários.</td></tr>`;
-      }
-    }
-
-    function filtrarTabelaUsuarios() {
-      const termo = document.getElementById('input-filtro-usuario').value.toLowerCase().trim();
-      
-      if (!termo) {
-        listaUsuariosFiltrados = [...listaUsuariosGlobais];
-      } else {
-        listaUsuariosFiltrados = listaUsuariosGlobais.filter(u => {
-          const nome = (u.nome_completo || '').toLowerCase();
-          const email = (u.email || '').toLowerCase();
-          const razao = (u.empresas?.razao_social || '').toLowerCase();
-          return nome.includes(termo) || email.includes(termo) || razao.includes(termo);
-        });
-      }
-
-      paginaAtualUsuario = 1;
-      renderizarTabelaUsuariosComPaginacao();
-    }
-
-    function renderizarTabelaUsuariosComPaginacao() {
-      const corpo = document.getElementById('tabela-usuarios-corpo');
-      const totalItens = listaUsuariosFiltrados.length;
-      const totalPaginas = Math.ceil(totalItens / itensPorPaginaUsuario) || 1;
-
-      if (totalItens === 0) {
-        corpo.innerHTML = `<tr><td colSpan="6" class="py-8 text-center text-slate-400">Nenhum usuário localizado.</td></tr>`;
-        document.getElementById('info-paginacao-usuarios').textContent = `Exibindo 0-0 de 0 usuários`;
-        document.getElementById('label-pagina-atual').textContent = `Página 1`;
-        document.getElementById('btn-usr-prev').disabled = true;
-        document.getElementById('btn-usr-next').disabled = true;
-        return;
-      }
-
-      if (paginaAtualUsuario > totalPaginas) paginaAtualUsuario = totalPaginas;
-
-      const inicio = (paginaAtualUsuario - 1) * itensPorPaginaUsuario;
-      const fim = Math.min(inicio + itensPorPaginaUsuario, totalItens);
-      const usuariosPagina = listaUsuariosFiltrados.slice(inicio, fim);
-
-      corpo.innerHTML = usuariosPagina.map((u) => `
-        <tr class="hover:bg-slate-50">
-          <td class="py-3 px-4 font-bold text-slate-800">${u.nome_completo}</td>
-          <td class="py-3 px-4 text-xs text-slate-600">${u.email}</td>
-          <td class="py-3 px-4 text-xs">
-            <span class="font-bold text-slate-800 block">${u.empresas ? u.empresas.razao_social : 'Sem empresa'}</span>
-            <span class="text-slate-400">${u.empresas ? u.empresas.cnpj : '--'}</span>
-          </td>
-          <td class="py-3 px-4 text-center">
-            <span class="px-2 py-0.5 text-[10px] font-bold rounded ${u.is_admin ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}">
-              ${u.is_admin ? 'ADMIN' : 'USUÁRIO'}
-            </span>
-          </td>
-          <td class="py-3 px-4 text-center">
-            <span class="px-2 py-0.5 text-[10px] font-bold rounded ${u.ativo ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
-              ${u.ativo ? 'ATIVO' : 'INATIVO'}
-            </span>
-          </td>
-          <td class="py-3 px-4 text-center">
-            <div class="flex items-center justify-center gap-2">
-              <button onclick="abrirModalEdicaoUsuarioId('${u.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" title="Editar Usuário"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-              <button onclick="excluirUsuarioAdmin('${u.id}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg" title="Excluir Usuário"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
-
-      document.getElementById('info-paginacao-usuarios').textContent = `Exibindo ${inicio + 1}-${fim} de ${totalItens} usuários`;
-      document.getElementById('label-pagina-atual').textContent = `Página ${paginaAtualUsuario} de ${totalPaginas}`;
-      document.getElementById('btn-usr-prev').disabled = paginaAtualUsuario <= 1;
-      document.getElementById('btn-usr-next').disabled = paginaAtualUsuario >= totalPaginas;
-
-      lucide.createIcons();
-    }
-
-    function mudarPaginaUsuario(delta) {
-      paginaAtualUsuario += delta;
-      renderizarTabelaUsuariosComPaginacao();
-    }
-
-    function abrirModalNovoUsuario() {
-      document.getElementById('form-novo-usuario').reset();
-      document.getElementById('modal-novo-usuario').classList.remove('hidden');
-    }
-
-    async function salvarNovoUsuario(e) {
-      e.preventDefault();
-      const payload = {
-        razao_social: document.getElementById('add-usr-razao').value,
-        cnpj: document.getElementById('add-usr-cnpj').value,
-        nome_completo: document.getElementById('add-usr-nome').value,
-        email: document.getElementById('add-usr-email').value,
-        senha: document.getElementById('add-usr-senha').value,
-        is_admin: document.getElementById('add-usr-admin').checked
-      };
-
-      try {
-        const res = await fetch(`${API_URL}/api/admin/usuarios?admin_id=${usuarioAtual.user_id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-
-        if (res.ok) {
-          document.getElementById('modal-novo-usuario').classList.add('hidden');
-          await carregarUsuariosAdmin();
-          alert("Usuário e licença criados com sucesso!");
-        } else {
-          alert(data.detail || "Erro ao cadastrar usuário.");
-        }
-      } catch (e) {
-        alert("Erro na conexão com o servidor.");
-      }
-    }
-
-    function abrirModalEdicaoUsuarioId(id) {
-      const u = listaUsuariosGlobais.find(usr => usr.id === id);
-      if (!u) return;
-
-      document.getElementById('edit-usr-id').value = u.id;
-      document.getElementById('edit-usr-nome').value = u.nome_completo;
-      document.getElementById('edit-usr-email').value = u.email;
-      document.getElementById('edit-usr-senha').value = '';
-      document.getElementById('edit-usr-admin').checked = u.is_admin === true;
-      document.getElementById('edit-usr-ativo').checked = u.ativo === true;
-
-      document.getElementById('modal-editar-usuario').classList.remove('hidden');
-    }
-
-    async function salvarEdicaoUsuario(e) {
-      e.preventDefault();
-      const id = document.getElementById('edit-usr-id').value;
-
-      const payload = {
-        nome_completo: document.getElementById('edit-usr-nome').value,
-        email: document.getElementById('edit-usr-email').value,
-        senha: document.getElementById('edit-usr-senha').value,
-        is_admin: document.getElementById('edit-usr-admin').checked,
-        ativo: document.getElementById('edit-usr-ativo').checked
-      };
-
-      try {
-        const res = await fetch(`${API_URL}/api/admin/usuarios/${id}?admin_id=${usuarioAtual.user_id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-
-        if (res.ok) {
-          document.getElementById('modal-editar-usuario').classList.add('hidden');
-          await carregarUsuariosAdmin();
-        } else {
-          alert(data.detail || "Erro ao atualizar usuário.");
-        }
-      } catch (e) {
-        alert("Erro na conexão com o servidor.");
-      }
-    }
-
-    async function excluirUsuarioAdmin(id) {
-      if (!confirm("Tem certeza que deseja excluir este usuário definitivamente?")) return;
-
-      try {
-        const res = await fetch(`${API_URL}/api/admin/usuarios/${id}?admin_id=${usuarioAtual.user_id}`, { method: 'DELETE' });
-        if (res.ok) {
-          await carregarUsuariosAdmin();
-        } else {
-          const data = await res.json();
-          alert(data.detail || "Erro ao remover usuário.");
-        }
-      } catch (e) {
-        alert("Erro na conexão com o servidor.");
-      }
-    }
-
-    // --- BARRA DE PROGRESSO & POLLING DE STATUS DA VARREDURA ---
-    function iniciarPollingStatusVarredura() {
-      if (timerPollingStatus) clearInterval(timerPollingStatus);
-      timerPollingStatus = setInterval(consultarStatusVarredura, 2000);
-    }
-
-    async function consultarStatusVarredura() {
-      if (!usuarioAtual) return;
-      try {
-        const res = await fetch(`${API_URL}/api/admin/sincronizacao-status?admin_id=${usuarioAtual.user_id}`);
-        if (!res.ok) return;
-
-        const data = await res.json();
-        const painel = document.getElementById('painel-progresso');
-
-        if (data.em_andamento) {
-          painel.classList.remove('hidden');
-
-          const pct = Math.min(Math.round(data.progresso_pct || 0), 100);
-          document.getElementById('porcentagem-progresso').textContent = `${pct}%`;
-          document.getElementById('barra-progresso-fill').style.width = `${pct}%`;
-
-          document.getElementById('lbl-editais-encontrados').textContent = data.editais_encontrados || 0;
-          document.getElementById('lbl-novos-inseridos').textContent = data.novos_inseridos || 0;
-          document.getElementById('lbl-pagina-exec').textContent = `${data.pagina_atual || 1} / ${data.total_paginas || 1}`;
-          document.getElementById('lbl-tempo-decorrido').textContent = `${data.tempo_decorrido_segundos || 0}s`;
-
-          document.getElementById('status-varredura-texto').innerHTML = `
-            <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-            ${data.mensagem || 'Executando varredura no PNCP...'}
-          `;
-          lucide.createIcons();
-        } else {
-          if (!painel.classList.contains('hidden') && data.mensagem === "Concluído") {
-            document.getElementById('barra-progresso-fill').style.width = '100%';
-            document.getElementById('porcentagem-progresso').textContent = '100%';
-            document.getElementById('status-varredura-texto').innerHTML = `✅ Varredura concluída com sucesso!`;
-            setTimeout(() => { painel.classList.add('hidden'); }, 5000);
-          } else {
-            painel.classList.add('hidden');
-          }
-        }
-      } catch (e) {
-        console.error("Erro no polling de status:", e);
-      }
-    }
-
-    // --- ABA CONFIGURADOR AUTOMÁTICO DE BUSCAS ---
-    async function salvarConfiguracaoAgendamento() {
-      const payload = {
-        ativo: document.getElementById('chk-agendamento-ativo').checked,
-        intervalo_minutos: parseInt(document.getElementById('input-intervalo-minutos').value),
-        dias_retroativos: parseInt(document.getElementById('input-dias-retroativos').value)
-      };
-
-      try {
-        const res = await fetch(`${API_URL}/api/admin/agendamento?admin_id=${usuarioAtual.user_id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (res.ok) {
-          alert("Configuração de agendamento salva com sucesso!");
-        } else {
-          alert(data.detail || "Erro ao salvar agendamento.");
-        }
-      } catch (e) {
-        alert("Erro na conexão com o servidor.");
-      }
-    }
-
-    async function dispararSincronizacao() {
-      try {
-        const res = await fetch(`${API_URL}/api/admin/sincronizar?admin_id=${usuarioAtual.user_id}`, { method: 'POST' });
-        const data = await res.json();
-        
-        if (res.ok) {
-          document.getElementById('painel-progresso').classList.remove('hidden');
-          consultarStatusVarredura();
-        } else {
-          if (confirm(`${data.detail}\n\nDeseja forçar o reinício da sincronização?`)) {
-            const resForcar = await fetch(`${API_URL}/api/admin/sincronizar?admin_id=${usuarioAtual.user_id}&forcar=true`, { method: 'POST' });
-            const dataForcar = await resForcar.json();
-            document.getElementById('painel-progresso').classList.remove('hidden');
-            consultarStatusVarredura();
-          }
-        }
-      } catch (e) {
-        alert("Erro ao disparar robô de varredura.");
-      }
-    }
-
-    async function pararSincronizacao() {
-      try {
-        const res = await fetch(`${API_URL}/api/admin/parar-sincronizacao?admin_id=${usuarioAtual.user_id}`, { method: 'POST' });
-        const data = await res.json();
-        alert(data.message || "Solicitação de parada enviada.");
-        consultarStatusVarredura();
-      } catch (e) {
-        alert("Erro ao enviar solicitação de parada.");
-      }
-    }
-
-    checarSessaoAdmin();
-    lucide.createIcons();
+    loadU(); loadAg(); checkSync();
   </script>
 </body>
 </html>
