@@ -406,21 +406,9 @@
         if (modoValor === 'unitario_item') valorExibicao = valUnitario;
         else if (modoValor === 'total_edital') valorExibicao = valTotalCompra;
 
+        // URL Oficial PNCP
         const urlPncpOficial = `https://pncp.gov.br/app/editais/${item.cnpj_orgao}/${item.ano}/${item.sequencial}`;
-        
-        // URL Correta e Atualizada para o Compras.gov.br (Serpro)
-        let urlPortalOrigem = urlPncpOficial;
-        let nomePortalExibicao = item.portal_nome || 'Portal de Origem';
-        
-        if (item.portal_nome && item.portal_nome.toLowerCase().includes('compras.gov')) {
-          // Formata o número da compra com 20 dígitos padrão do Comprasnet se necessário, ou usa o sequencial formatado
-          const seqFormatado = String(item.sequencial).padStart(5, '0');
-          const anoSeq = `${item.ano}${seqFormatado}`;
-          const uasgFormatada = String(item.uasg || '090102').padStart(6, '0');
-          const compraIdCompleta = `${uasgFormatada}05${anoSeq}`;
-          
-          urlPortalOrigem = `https://cnetmobile.estaleiro.serpro.gov.br/comprasnet-web/public/compras/acompanhamento-compra?compra=${compraIdCompleta}`;
-        }
+        const nomePortalExibicao = item.portal_nome || 'Portal de Origem';
 
         return `
           <tr class="hover:bg-slate-50 border-b border-slate-100 align-top">
@@ -432,7 +420,7 @@
             <td class="py-4 px-4 font-semibold text-slate-900 max-w-[200px] break-words">
               ${item.orgao_nome} 
               <span class="inline-block bg-slate-100 text-[10px] font-bold px-1.5 py-0.5 rounded text-slate-700 ml-1">${item.uf}</span>
-              <span class="block text-[10px] text-blue-600 font-bold mt-1">🌐 Portal: ${item.portal_nome || 'PNCP'}</span>
+              <span class="block text-[10px] text-blue-600 font-bold mt-1">🌐 Portal: ${nomePortalExibicao}</span>
             </td>
             <td class="py-4 px-4 text-xs font-medium text-slate-700 whitespace-nowrap">
               <span class="font-bold text-slate-900">Edital: ${item.numero_compra || item.sequencial}</span>
@@ -462,7 +450,7 @@
                   <p class="font-bold text-slate-900 border-b pb-1 flex items-center gap-1"><i data-lucide="info" class="w-3.5 h-3.5 text-blue-600"></i> Informações do Órgão</p>
                   <p><strong>CNPJ do Órgão:</strong> ${item.cnpj_orgao || 'Não informado'}</p>
                   <p><strong>UASG / Código Unidade:</strong> <span class="text-blue-600 font-bold">${item.uasg || 'Não informado'}</span></p>
-                  <p><strong>Portal Oficial:</strong> ${item.portal_nome || 'PNCP'}</p>
+                  <p><strong>Portal Oficial:</strong> ${nomePortalExibicao}</p>
                 </div>
                 <div class="space-y-1.5">
                   <p class="font-bold text-slate-900 border-b pb-1 flex items-center gap-1"><i data-lucide="tag" class="w-3.5 h-3.5 text-emerald-600"></i> Detalhes do Edital</p>
@@ -478,13 +466,10 @@
                 </div>
               </div>
 
-              <!-- BOTÕES DE REDIRECIONAMENTO OFICIAL -->
+              <!-- BOTÕES DE REDIRECIONAMENTO -->
               <div class="mt-3 flex flex-wrap gap-3">
                 <a href="${urlPncpOficial}" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow flex items-center gap-1.5 transition-colors">
-                  <i data-lucide="external-link" class="w-4 h-4"></i> Abrir Edital no PNCP Oficial
-                </a>
-                <a href="${urlPortalOrigem}" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow flex items-center gap-1.5 transition-colors">
-                  <i data-lucide="globe" class="w-4 h-4"></i> Abrir no Portal de Origem (${nomePortalExibicao})
+                  <i data-lucide="external-link" class="w-4 h-4"></i> Abrir no PNCP Oficial (Com acesso direto ao Portal de Origem)
                 </a>
               </div>
 
