@@ -486,7 +486,7 @@
 
     async function abrirModalAnexos(cnpj, ano, seq) {
       document.getElementById('modal-anexos').classList.remove('hidden'); 
-      document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Buscando documentos oficiais...</p>`;
+      document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Buscando documentos oficiais no PNCP...</p>`;
       
       let htmlConteudo = `
         <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between gap-3 mb-4">
@@ -504,10 +504,11 @@
         const arquivos = data.arquivos || [];
 
         if (arquivos.length === 0) {
+          const msgAviso = data.mensagem || "Nenhum arquivo PDF direto listado na API deste edital.";
           htmlConteudo += `
             <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-center space-y-2">
-              <p class="text-xs font-bold text-amber-800">Nenhum arquivo listado pela API do PNCP</p>
-              <p class="text-[11px] text-amber-700">Utilize o botão "Abrir no Portal de Origem" na linha do edital para baixar os documentos diretamente no Compras.gov.br.</p>
+              <p class="text-xs font-bold text-amber-800">${msgAviso}</p>
+              <p class="text-[11px] text-amber-700">Clique no botão azul acima para visualizar e baixar os arquivos diretamente na página do PNCP.</p>
             </div>
           `;
         } else {
@@ -527,7 +528,7 @@
         document.getElementById('lista-anexos-corpo').innerHTML = htmlConteudo;
         lucide.createIcons();
       } catch (e) {
-        document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao buscar arquivos.</p>`;
+        document.getElementById('lista-anexos-corpo').innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar modal de arquivos.</p>`;
       }
     }
 
