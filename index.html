@@ -61,11 +61,17 @@
     <main class="max-w-7xl mx-auto px-6 py-6 space-y-6 flex-1 w-full">
       <!-- PAINEL DE FILTROS AVANÇADOS -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <!-- LINHA 1: TERMO E ONDE BUSCAR -->
+        
+        <!-- LINHA 1: TERMO, BOTÃO PALAVRAS-CHAVE E ONDE BUSCAR -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="md:col-span-3">
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Produto/Serviço (Termo de busca):</label>
-            <input type="text" id="input-termo" placeholder="Digite o termo ou deixe vazio p/ usar palavras cadastradas" class="w-full px-3.5 py-2 bg-slate-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-bold text-slate-600 uppercase">Produto/Serviço (Termo de busca):</label>
+              <button onclick="abrirModalPalavrasChave()" class="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
+                <i data-lucide="key" class="w-3.5 h-3.5"></i> Minhas Palavras-Chave
+              </button>
+            </div>
+            <input type="text" id="input-termo" placeholder="Digite o termo ou selecione nas suas palavras cadastradas" class="w-full px-3.5 py-2 bg-slate-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Onde buscar o termo:</label>
@@ -215,6 +221,31 @@
     </main>
   </div>
 
+  <!-- MODAL DE PALAVRAS-CHAVE -->
+  <div id="modal-palavras-chave" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200">
+      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <h3 class="font-bold text-sm flex items-center gap-2">
+          <i data-lucide="key" class="w-4 h-4 text-amber-400"></i> Minhas Palavras-Chave Salvas
+        </h3>
+        <button onclick="document.getElementById('modal-palavras-chave').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-4 border-b border-slate-100 bg-slate-50 flex gap-2">
+        <input type="text" id="input-nova-palavra" placeholder="Digite uma nova palavra ou termo..." class="flex-1 px-3 py-2 bg-white border rounded-lg text-xs focus:outline-none">
+        <button onclick="adicionarPalavraChave()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Adicionar</button>
+      </div>
+
+      <div id="lista-palavras-corpo" class="p-4 max-h-[50vh] overflow-y-auto space-y-2">
+        <p class="text-xs text-slate-400 text-center py-4">Carregando termos...</p>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-200 text-right">
+        <button onclick="document.getElementById('modal-palavras-chave').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL DINÂMICO PARA SELEÇÃO DE PORTAIS -->
   <div id="modal-portais" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
@@ -286,33 +317,8 @@
     let usuarioAtual = null;
     let dadosLocais = [];
     let listaPortaisGlobais = [];
+    let palavrasSalvas = [];
     let paginaAtual = 1, totalPaginas = 1;
-
-    async function carregarPortaisDoBanco() {
-  const container = document.getElementById('container-portais-checks');
-  try {
-    const res = await fetch(`${API_URL}/api/licitacoes/portais`);
-    const data = await res.json();
-    listaPortaisGlobais = data.portais || [];
-
-    document.getElementById('qtd-portais-carregados').textContent = `${listaPortaisGlobais.length} portais disponíveis`;
-
-    if (listaPortaisGlobais.length === 0) {
-      container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhum portal disponível.</p>`;
-      return;
-    }
-
-    container.innerHTML = listaPortaisGlobais.map(portal => `
-      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer">
-        <input type="checkbox" value="${portal}" class="chk-portal rounded border-slate-300" onchange="atualizarTextoPortais()"> ${portal}
-      </label>
-    `).join('');
-
-  } catch (e) {
-    container.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar lista de portais.</p>`;
-  }
-}
-
 
     function formatarData(dtString) {
       if (!dtString) return '--';
@@ -327,11 +333,105 @@
       return 'R$ ' + Number(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    // --- GERENCIAMENTO DE PALAVRAS-CHAVE ---
+    async function abrirModalPalavrasChave() {
+      document.getElementById('modal-palavras-chave').classList.remove('hidden');
+      await carregarPalavrasChave();
+    }
+
+    async function carregarPalavrasChave() {
+      const corpo = document.getElementById('lista-palavras-corpo');
+      try {
+        const res = await fetch(`${API_URL}/api/palavras-chave?user_id=${usuarioAtual.user_id}`);
+        const data = await res.json();
+        palavrasSalvas = data.palavras || [];
+
+        if (palavrasSalvas.length === 0) {
+          corpo.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Nenhuma palavra-chave cadastrada.</p>`;
+          return;
+        }
+
+        corpo.innerHTML = palavrasSalvas.map(p => `
+          <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2">
+            <span class="text-xs font-semibold text-slate-800 cursor-pointer hover:text-blue-600 flex-1" onclick="usarPalavraChave('${p.termo}')">${p.termo}</span>
+            <button onclick="removerPalavraChave(${p.id})" class="p-1 text-slate-400 hover:text-red-500 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </div>
+        `).join('');
+
+        lucide.createIcons();
+      } catch (e) {
+        corpo.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar palavras-chave.</p>`;
+      }
+    }
+
+    async function adicionarPalavraChave() {
+      const input = document.getElementById('input-nova-palavra');
+      const termo = input.value.trim();
+      if (!termo) return;
+
+      try {
+        const res = await fetch(`${API_URL}/api/palavras-chave`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: usuarioAtual.user_id, termo: termo })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          input.value = '';
+          await carregarPalavrasChave();
+        } else {
+          alert(data.detail || "Erro ao adicionar termo.");
+        }
+      } catch (e) {
+        alert("Falha na comunicação com o servidor.");
+      }
+    }
+
+    async function removerPalavraChave(id) {
+      try {
+        await fetch(`${API_URL}/api/palavras-chave/${id}`, { method: 'DELETE' });
+        await carregarPalavrasChave();
+      } catch (e) {
+        alert("Erro ao remover termo.");
+      }
+    }
+
+    function usarPalavraChave(termo) {
+      document.getElementById('input-termo').value = termo;
+      document.getElementById('modal-palavras-chave').classList.add('hidden');
+      buscarLicitacoes(1);
+    }
+
+    // --- GERENCIAMENTO DE PORTAIS ---
     function toggleModalPortais() {
       document.getElementById('modal-portais').classList.toggle('hidden');
     }
 
-    
+    async function carregarPortaisDoBanco() {
+      const container = document.getElementById('container-portais-checks');
+      try {
+        const res = await fetch(`${API_URL}/api/licitacoes/portais`);
+        const data = await res.json();
+        listaPortaisGlobais = data.portais || [];
+
+        document.getElementById('qtd-portais-carregados').textContent = `${listaPortaisGlobais.length} portais disponíveis`;
+
+        if (listaPortaisGlobais.length === 0) {
+          container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhum portal cadastrado no banco.</p>`;
+          return;
+        }
+
+        container.innerHTML = listaPortaisGlobais.map(portal => `
+          <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 p-1.5 rounded cursor-pointer">
+            <input type="checkbox" value="${portal}" class="chk-portal rounded border-slate-300" onchange="atualizarTextoPortais()"> ${portal}
+          </label>
+        `).join('');
+
+      } catch (e) {
+        container.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar lista de portais.</p>`;
+      }
+    }
+
     function marcarTodosPortais(chk) {
       const checkboxes = document.querySelectorAll('.chk-portal');
       checkboxes.forEach(cb => cb.checked = false);
@@ -352,6 +452,7 @@
       }
     }
 
+    // --- AUTENTICAÇÃO E SESSÃO ---
     function checarSessao() {
       const sessaoSalva = localStorage.getItem('usuario_sessao');
       if (sessaoSalva) {
@@ -409,6 +510,7 @@
       checarSessao();
     });
 
+    // --- PESQUISA E TABELA ---
     async function buscarLicitacoes(pagina = 1) {
       paginaAtual = pagina;
       const corpo = document.getElementById('tabela-corpo');
