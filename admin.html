@@ -3,240 +3,643 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Admin - Hub Licitações</title>
+  <title>Painel Administrativo - Hub Licitações</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col">
 
-  <script>
-    // BLOQUEIO DE SEGURANÇA IMEDIATO NO CARREGAMENTO DA PÁGINA
-    (function verificarAcessoAdmin() {
-      const sessaoSalva = localStorage.getItem('usuario_sessao');
-      if (!sessaoSalva) {
-        window.location.href = 'index.html';
-        return;
-      }
-      const usuario = JSON.parse(sessaoSalva);
-      if (usuario.is_admin !== true) {
-        alert('Acesso negado. Apenas administradores podem acessar esta página.');
-        window.location.href = 'index.html';
-      }
-    })();
-  </script>
-
-  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
+  <!-- CABEÇALHO DO PAINEL ADMIN -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="bg-amber-500 text-slate-950 p-2 rounded-lg font-bold text-lg">ADMIN</div>
-        <span class="font-semibold text-lg">Painel de Controle e Automação</span>
+        <div class="bg-amber-500 text-slate-900 p-2 rounded-lg font-bold text-lg">ADMIN</div>
+        <span class="font-semibold text-lg tracking-wide">Painel de Gestão e Licenças</span>
       </div>
-      <a href="index.html" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg border border-slate-600">
-        ← Voltar ao App
-      </a>
+      <div class="flex items-center space-x-4">
+        <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar ao Buscador
+        </a>
+        <button id="btn-logout-admin" onclick="logoutAdmin()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow">Sair</button>
+      </div>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+  <main class="max-w-7xl mx-auto px-6 py-6 space-y-6 flex-1 w-full">
 
-    <!-- CADASTRO DE NOVO USUÁRIO -->
-    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4">
-      <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-        <i data-lucide="user-plus" class="w-5 h-5"></i> Cadastrar Novo Usuário e CNPJ
-      </h2>
-      <div id="msg-cad-user" class="hidden p-3 rounded-lg text-xs font-bold"></div>
-      <form id="form-cad-user" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">CNPJ da Empresa</label>
-          <input type="text" id="cad-cnpj" required placeholder="Apenas números" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Razão Social</label>
-          <input type="text" id="cad-razao" required placeholder="Nome da empresa" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nome Completo do Usuário</label>
-          <input type="text" id="cad-nome" required placeholder="Nome do responsável" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">E-mail de Login</label>
-          <input type="email" id="cad-email" required placeholder="usuario@empresa.com" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Senha</label>
-          <input type="text" id="cad-senha" required value="123456" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Validade (Dias)</label>
-          <input type="number" id="cad-dias" required value="30" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Limite Diário de IA</label>
-          <input type="number" id="cad-limite-ia" required value="10" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Perfil Administrador?</label>
-          <select id="cad-is-admin" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white">
-            <option value="false">Não (Usuário Comum)</option>
-            <option value="true">Sim (Administrador)</option>
-          </select>
-        </div>
-        <div class="flex items-end">
-          <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 px-4 rounded-lg text-sm">
-            Salvar Usuário & Licença
-          </button>
-        </div>
-      </form>
+    <!-- NAVEGAÇÃO POR ABAS -->
+    <div class="flex border-b border-slate-200 space-x-4">
+      <button onclick="trocarAba('aba-licencas')" id="btn-aba-licencas" class="py-2.5 px-4 border-b-2 border-blue-600 font-bold text-sm text-blue-600 flex items-center gap-2">
+        <i data-lucide="key" class="w-4 h-4"></i> Licenças e Módulos
+      </button>
+      <button onclick="trocarAba('aba-usuarios')" id="btn-aba-usuarios" class="py-2.5 px-4 border-b-2 border-transparent font-bold text-sm text-slate-500 hover:text-slate-700 flex items-center gap-2">
+        <i data-lucide="users" class="w-4 h-4"></i> Gerenciar Usuários
+      </button>
+      <button onclick="trocarAba('aba-sincronizacao')" id="btn-aba-sincronizacao" class="py-2.5 px-4 border-b-2 border-transparent font-bold text-sm text-slate-500 hover:text-slate-700 flex items-center gap-2">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Sincronização PNCP
+      </button>
     </div>
 
-    <!-- AGENDAMENTO AUTOMÁTICO -->
-    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4">
-      <h2 class="text-lg font-bold text-blue-400 flex items-center gap-2">
-        <i data-lucide="clock" class="w-5 h-5"></i> Agendamento Automático de Varredura
-      </h2>
-      <div id="msg-agendamento" class="hidden p-3 rounded-lg text-xs font-bold"></div>
-      <form id="form-agendamento" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Status da Varredura Auto</label>
-          <select id="agd-ativo" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white">
-            <option value="false">Desativado</option>
-            <option value="true">Ativado</option>
-          </select>
+    <!-- =================================================================== -->
+    <!-- ABA 1: LICENÇAS E MÓDULOS -->
+    <!-- =================================================================== -->
+    <div id="aba-licencas" class="space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+          <i data-lucide="building-2" class="w-5 h-5 text-blue-600"></i> Selecione o Perfil do Cliente para Editar:
+        </h3>
+        <select id="select-cliente-licenca" onchange="carregarLicencaCliente()" class="w-full bg-slate-50 border border-slate-200 text-slate-800 py-2.5 px-3.5 rounded-xl text-sm font-semibold">
+          <option value="">Carregando clientes...</option>
+        </select>
+      </div>
+
+      <!-- PAINEL DE EDIÇÃO DA LICENÇA -->
+      <div id="painel-edicao-licenca" class="hidden space-y-6">
+        <!-- CONFIGURAÇÃO GLOBAL IA -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <h4 class="font-bold text-slate-800 text-sm">1. Configurações Globais do Cliente</h4>
+          <div class="flex items-center gap-4">
+            <div class="flex-1 max-w-xs">
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Limite Global de Análises IA / Dia:</label>
+              <input type="number" id="input-limite-ia" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-sm font-bold">
+            </div>
+            <div class="flex items-end">
+              <button onclick="salvarLimiteIA()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Salvar Limite IA</button>
+            </div>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Intervalo (Minutos)</label>
-          <input type="number" id="agd-intervalo" required value="60" min="15" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white">
+
+        <!-- MÓDULOS ATIVOS -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <h4 class="font-bold text-slate-800 text-sm">2. Módulos Ativos para este Cliente</h4>
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
+              <i data-lucide="search" class="w-5 h-5 text-amber-500"></i> Buscador PNCP
+            </div>
+            
+            <div class="flex items-center gap-4 w-full md:w-auto">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Validade da Licença:</label>
+                <input type="date" id="input-dt-validade-modulo" class="px-3 py-1.5 bg-white border rounded-lg text-xs font-bold">
+              </div>
+
+              <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer pt-4">
+                <input type="checkbox" id="chk-modulo-ativo" class="rounded border-slate-300 w-4 h-4 text-blue-600">
+                Módulo Ativo?
+              </label>
+            </div>
+
+            <div>
+              <button onclick="salvarModuloPNCP()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow">Atualizar Módulo</button>
+            </div>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Dias Retroativos</label>
-          <input type="number" id="agd-dias" required value="2" min="1" max="10" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white">
-        </div>
-        <div>
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg text-sm">
-            Salvar Agendamento
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
 
-    <!-- CONTROLADOR DE SINCRONIZAÇÃO MANUAL -->
-    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4">
-      <div class="flex justify-between items-center">
+    <!-- =================================================================== -->
+    <!-- ABA 2: GERENCIAR USUÁRIOS -->
+    <!-- =================================================================== -->
+    <div id="aba-usuarios" class="hidden space-y-4">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
-          <h2 class="text-lg font-bold text-emerald-400 flex items-center gap-2">
-            <i data-lucide="refresh-cw" class="w-5 h-5"></i> Sincronização Manual Direta
-          </h2>
-          <p class="text-xs text-slate-400 mt-1">Dispare a busca manual a qualquer momento sem travar o servidor</p>
+          <h3 class="font-bold text-slate-800 text-base">Usuários Cadastrados</h3>
+          <p class="text-xs text-slate-500">Visualize, crie, edite senhas e altere permissões dos usuários.</p>
         </div>
-        <div class="flex gap-2">
-          <button id="btn-sync-now" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm flex items-center gap-1">
-            <i data-lucide="play" class="w-4 h-4"></i> Iniciar Agora
+        
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <!-- FILTRO POR NOME OU EMAIL -->
+          <div class="relative w-full md:w-64">
+            <input 
+              type="text" 
+              id="input-filtro-usuario" 
+              onkeyup="filtrarTabelaUsuarios()" 
+              placeholder="Buscar por nome ou e-mail..." 
+              class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2"></i>
+          </div>
+
+          <button onclick="abrirModalNovoUsuario()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg flex items-center gap-1 shrink-0 shadow">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Novo Usuário
           </button>
-          <button id="btn-sync-stop" disabled class="bg-red-600/20 text-red-400 border border-red-600/50 font-bold px-4 py-2 rounded-lg text-sm disabled:opacity-40">
-            Parar
+
+          <button onclick="carregarUsuariosAdmin()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg flex items-center gap-1 shrink-0">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           </button>
         </div>
       </div>
-      <div class="pt-2 border-t border-slate-700">
-        <span id="sync-msg" class="text-xs text-slate-300 font-medium">Aguardando comando...</span>
+
+      <!-- TABELA DE USUÁRIOS -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-xs">
+              <tr>
+                <th class="py-3 px-4">Nome</th>
+                <th class="py-3 px-4">E-mail</th>
+                <th class="py-3 px-4">Empresa / CNPJ</th>
+                <th class="py-3 px-4 text-center">Perfil</th>
+                <th class="py-3 px-4 text-center">Status</th>
+                <th class="py-3 px-4 text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-usuarios-corpo" class="divide-y divide-slate-100 text-slate-700">
+              <tr><td colSpan="6" class="py-8 text-center text-slate-400">Carregando usuários...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- RODAPÉ COM PAGINAÇÃO -->
+        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+          <span id="info-paginacao-usuarios" class="text-xs font-semibold text-slate-500">Exibindo 0-0 de 0 usuários</span>
+          <div class="flex gap-2">
+            <button id="btn-usr-prev" onclick="mudarPaginaUsuario(-1)" disabled class="px-3 py-1.5 bg-white border border-slate-200 text-xs font-bold rounded-lg disabled:opacity-50 hover:bg-slate-100">← Anterior</button>
+            <span id="label-pagina-atual" class="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-200/60 rounded-lg flex items-center">Página 1</span>
+            <button id="btn-usr-next" onclick="mudarPaginaUsuario(1)" disabled class="px-3 py-1.5 bg-white border border-slate-200 text-xs font-bold rounded-lg disabled:opacity-50 hover:bg-slate-100">Próximo →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- ABA 3: SINCRONIZAÇÃO E ROBÔ PNCP -->
+    <!-- =================================================================== -->
+    <div id="aba-sincronizacao" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+          <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> Execução Manual de Varredura
+        </h3>
+        <p class="text-xs text-slate-500">Dispare o robô de varredura para extrair e atualizar os editais do PNCP no Supabase em segundo plano.</p>
+        <div class="flex gap-3">
+          <button onclick="dispararSincronizacao()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow flex items-center gap-2">
+            <i data-lucide="play" class="w-4 h-4"></i> Iniciar Sincronização Agora
+          </button>
+          <button onclick="pararSincronizacao()" class="px-4 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-xl text-xs flex items-center gap-2">
+            <i data-lucide="square" class="w-4 h-4"></i> Parar Robô
+          </button>
+        </div>
       </div>
     </div>
 
   </main>
 
+  <!-- MODAL DE CADASTRO DE NOVO USUÁRIO -->
+  <div id="modal-novo-usuario" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
+      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <h3 class="font-bold text-sm flex items-center gap-2"><i data-lucide="user-plus" class="w-4 h-4 text-blue-400"></i> Cadastrar Novo Usuário</h3>
+        <button onclick="document.getElementById('modal-novo-usuario').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="form-novo-usuario" onsubmit="salvarNovoUsuario(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Razão Social da Empresa</label>
+          <input type="text" id="add-usr-razao" required placeholder="Ex: Minha Empresa LTDA" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">CNPJ da Empresa</label>
+          <input type="text" id="add-usr-cnpj" required placeholder="00.000.000/0000-00" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome Completo do Usuário</label>
+          <input type="text" id="add-usr-nome" required placeholder="Nome do responsável" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail de Acesso</label>
+          <input type="email" id="add-usr-email" required placeholder="usuario@email.com" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha de Acesso</label>
+          <input type="password" id="add-usr-senha" required placeholder="••••••••" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+            <input type="checkbox" id="add-usr-admin" class="rounded border-slate-300"> É Administrador?
+          </label>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+          <button type="button" onclick="document.getElementById('modal-novo-usuario').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Criar Usuário</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE EDIÇÃO DE USUÁRIO -->
+  <div id="modal-editar-usuario" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
+      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <h3 class="font-bold text-sm">Editar Usuário</h3>
+        <button onclick="document.getElementById('modal-editar-usuario').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="form-editar-usuario" onsubmit="salvarEdicaoUsuario(event)" class="p-6 space-y-4">
+        <input type="hidden" id="edit-usr-id">
+        
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome Completo</label>
+          <input type="text" id="edit-usr-nome" required class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail</label>
+          <input type="email" id="edit-usr-email" required class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nova Senha (deixe em branco para manter a atual)</label>
+          <input type="password" id="edit-usr-senha" placeholder="••••••••" class="w-full px-3 py-2 bg-slate-50 border rounded-lg text-xs">
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+            <input type="checkbox" id="edit-usr-admin" class="rounded border-slate-300"> É Administrador?
+          </label>
+          
+          <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+            <input type="checkbox" id="edit-usr-ativo" class="rounded border-slate-300"> Conta Ativa?
+          </label>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+          <button type="button" onclick="document.getElementById('modal-editar-usuario').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     const API_URL = "https://buscador-web-6i6s.onrender.com";
-    const sessao = JSON.parse(localStorage.getItem('usuario_sessao') || '{}');
-    const adminId = sessao.user_id || '';
+    let usuarioAtual = null;
+    let listaClientesGlobais = [];
+    
+    // Variáveis de Gestão e Paginação de Usuários
+    let listaUsuariosGlobais = [];
+    let listaUsuariosFiltrados = [];
+    let paginaAtualUsuario = 1;
+    const itensPorPaginaUsuario = 10;
 
-    async function carregarAgendamento() {
-      try {
-        const res = await fetch(`${API_URL}/api/admin/agendamento`);
-        const data = await res.json();
-        document.getElementById('agd-ativo').value = data.ativo ? "true" : "false";
-        document.getElementById('agd-intervalo').value = data.intervalo_minutos || 60;
-        document.getElementById('agd-dias').value = data.dias_retroativos || 2;
-      } catch (e) {}
-    }
-
-    document.getElementById('form-agendamento').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const msgBox = document.getElementById('msg-agendamento');
-      try {
-        const res = await fetch(`${API_URL}/api/admin/agendamento?admin_id=${adminId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ativo: document.getElementById('agd-ativo').value === "true",
-            intervalo_minutos: parseInt(document.getElementById('agd-intervalo').value),
-            dias_retroativos: parseInt(document.getElementById('agd-dias').value)
-          })
-        });
-        const data = await res.json();
-        msgBox.textContent = data.message;
-        msgBox.className = "p-3 rounded-lg text-xs font-bold bg-emerald-900/50 text-emerald-300 border border-emerald-700";
-        msgBox.classList.remove('hidden');
-      } catch (err) {
-        msgBox.textContent = "Erro ao salvar agendamento.";
-        msgBox.className = "p-3 rounded-lg text-xs font-bold bg-red-900/50 text-red-300 border border-red-700";
-        msgBox.classList.remove('hidden');
-      }
-    });
-
-    document.getElementById('form-cad-user').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const msgBox = document.getElementById('msg-cad-user');
-      try {
-        const res = await fetch(`${API_URL}/api/admin/usuarios?admin_id=${adminId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cnpj: document.getElementById('cad-cnpj').value,
-            razao_social: document.getElementById('cad-razao').value,
-            nome_completo: document.getElementById('cad-nome').value,
-            email: document.getElementById('cad-email').value,
-            senha: document.getElementById('cad-senha').value,
-            dias_validade: parseInt(document.getElementById('cad-dias').value),
-            limite_ia: parseInt(document.getElementById('cad-limite-ia').value),
-            is_admin: document.getElementById('cad-is-admin').value === "true"
-          })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          msgBox.textContent = data.message;
-          msgBox.className = "p-3 rounded-lg text-xs font-bold bg-emerald-900/50 text-emerald-300 border border-emerald-700";
-        } else {
-          msgBox.textContent = data.detail || "Erro no cadastro.";
-          msgBox.className = "p-3 rounded-lg text-xs font-bold bg-red-900/50 text-red-300 border border-red-700";
+    function checarSessaoAdmin() {
+      const sessaoSalva = localStorage.getItem('usuario_sessao');
+      if (sessaoSalva) {
+        usuarioAtual = JSON.parse(sessaoSalva);
+        if (!usuarioAtual.is_admin) {
+          alert("Acesso negado. Apenas administradores podem acessar esta página.");
+          window.location.href = "index.html";
+          return;
         }
-        msgBox.classList.remove('hidden');
-      } catch (err) {
-        msgBox.textContent = "Falha ao conectar com o servidor.";
-        msgBox.className = "p-3 rounded-lg text-xs font-bold bg-red-900/50 text-red-300 border border-red-700";
-        msgBox.classList.remove('hidden');
+        carregarClientesLicenca();
+      } else {
+        window.location.href = "index.html";
       }
-    });
-
-    document.getElementById('btn-sync-now').addEventListener('click', async () => {
-      await fetch(`${API_URL}/api/admin/sincronizar?admin_id=${adminId}`, { method: 'POST' });
-    });
-
-    document.getElementById('btn-sync-stop').addEventListener('click', async () => {
-      await fetch(`${API_URL}/api/admin/parar-sincronizacao?admin_id=${adminId}`, { method: 'POST' });
-    });
-
-    async function checarStatusSync() {
-      try {
-        const res = await fetch(`${API_URL}/api/admin/status-sincronizacao`);
-        const data = await res.json();
-        document.getElementById('sync-msg').textContent = data.progresso.mensagem || "Pronto.";
-        document.getElementById('btn-sync-now').disabled = data.ativa;
-        document.getElementById('btn-sync-stop').disabled = !data.ativa;
-      } catch (e) {}
     }
 
-    setInterval(checarStatusSync, 2000);
-    carregarAgendamento();
+    function logoutAdmin() {
+      localStorage.removeItem('usuario_sessao');
+      window.location.href = "index.html";
+    }
+
+    // --- CONTROLE DE ABAS ---
+    function trocarAba(nomeAba) {
+      document.getElementById('aba-licencas').classList.add('hidden');
+      document.getElementById('aba-usuarios').classList.add('hidden');
+      document.getElementById('aba-sincronizacao').classList.add('hidden');
+
+      const abas = ['btn-aba-licencas', 'btn-aba-usuarios', 'btn-aba-sincronizacao'];
+      abas.forEach(id => {
+        document.getElementById(id).classList.replace('border-blue-600', 'border-transparent');
+        document.getElementById(id).classList.replace('text-blue-600', 'text-slate-500');
+      });
+
+      document.getElementById(nomeAba).classList.remove('hidden');
+
+      if (nomeAba === 'aba-licencas') {
+        document.getElementById('btn-aba-licencas').classList.replace('border-transparent', 'border-blue-600');
+        document.getElementById('btn-aba-licencas').classList.replace('text-slate-500', 'text-blue-600');
+      } else if (nomeAba === 'aba-usuarios') {
+        document.getElementById('btn-aba-usuarios').classList.replace('border-transparent', 'border-blue-600');
+        document.getElementById('btn-aba-usuarios').classList.replace('text-slate-500', 'text-blue-600');
+        carregarUsuariosAdmin();
+      } else if (nomeAba === 'aba-sincronizacao') {
+        document.getElementById('btn-aba-sincronizacao').classList.replace('border-transparent', 'border-blue-600');
+        document.getElementById('btn-aba-sincronizacao').classList.replace('text-slate-500', 'text-blue-600');
+      }
+    }
+
+    // --- ABA LICENÇAS ---
+    async function carregarClientesLicenca() {
+      const select = document.getElementById('select-cliente-licenca');
+      try {
+        const res = await fetch(`${API_URL}/api/admin/usuarios?admin_id=${usuarioAtual.user_id}`);
+        const data = await res.json();
+        const usuarios = data.usuarios || [];
+
+        const empresasUnicas = {};
+        usuarios.forEach(u => {
+          if (u.empresas && !empresasUnicas[u.empresas.cnpj]) {
+            empresasUnicas[u.empresas.cnpj] = u.empresas;
+          }
+        });
+
+        listaClientesGlobais = Object.values(empresasUnicas);
+
+        select.innerHTML = `<option value="">Selecione um cliente...</option>` + listaClientesGlobais.map(e => `
+          <option value="${e.cnpj}">${e.razao_social} (CNPJ: ${e.cnpj})</option>
+        `).join('');
+
+      } catch (e) {
+        select.innerHTML = `<option value="">Erro ao carregar clientes.</option>`;
+      }
+    }
+
+    async function carregarLicencaCliente() {
+      const cnpj = document.getElementById('select-cliente-licenca').value;
+      const painel = document.getElementById('painel-edicao-licenca');
+      if (!cnpj) {
+        painel.classList.add('hidden');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/licenca-detalhe?cnpj=${cnpj}&admin_id=${usuarioAtual.user_id}`);
+        const data = await res.json();
+
+        if (res.ok && data.licenca) {
+          document.getElementById('input-limite-ia').value = data.licenca.limite_ia_diario || 10;
+          document.getElementById('input-dt-validade-modulo').value = data.licenca.data_expiracao || '';
+          document.getElementById('chk-modulo-ativo').checked = data.licenca.ativa === true;
+          painel.classList.remove('hidden');
+        } else {
+          alert("Licença não encontrada para esta empresa.");
+          painel.classList.add('hidden');
+        }
+      } catch (e) {
+        alert("Erro ao buscar detalhes da licença.");
+      }
+    }
+
+    async function salvarLimiteIA() {
+      const cnpj = document.getElementById('select-cliente-licenca').value;
+      const limite = document.getElementById('input-limite-ia').value;
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/limite-ia?admin_id=${usuarioAtual.user_id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cnpj, limite_ia: parseInt(limite) })
+        });
+        if (res.ok) alert("Limite de IA atualizado!");
+        else alert("Erro ao salvar limite de IA.");
+      } catch (e) {
+        alert("Erro na conexão com o servidor.");
+      }
+    }
+
+    async function salvarModuloPNCP() {
+      const cnpj = document.getElementById('select-cliente-licenca').value;
+      const dataExp = document.getElementById('input-dt-validade-modulo').value;
+      const ativa = document.getElementById('chk-modulo-ativo').checked;
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/atualizar-modulo?admin_id=${usuarioAtual.user_id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cnpj, data_expiracao: dataExp, ativa })
+        });
+        if (res.ok) alert("Módulo Buscador PNCP atualizado com sucesso!");
+        else alert("Erro ao atualizar módulo.");
+      } catch (e) {
+        alert("Erro na conexão com o servidor.");
+      }
+    }
+
+    // --- ABA GERENCIAR USUÁRIOS COM PAGINAÇÃO ---
+    async function carregarUsuariosAdmin() {
+      const corpo = document.getElementById('tabela-usuarios-corpo');
+      corpo.innerHTML = `<tr><td colSpan="6" class="py-8 text-center text-slate-400">Carregando usuários...</td></tr>`;
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/usuarios?admin_id=${usuarioAtual.user_id}`);
+        const data = await res.json();
+        listaUsuariosGlobais = data.usuarios || [];
+        listaUsuariosFiltrados = [...listaUsuariosGlobais];
+
+        document.getElementById('input-filtro-usuario').value = '';
+        paginaAtualUsuario = 1;
+        renderizarTabelaUsuariosComPaginacao();
+      } catch (e) {
+        corpo.innerHTML = `<tr><td colSpan="6" class="py-8 text-center text-red-500">Erro ao carregar lista de usuários.</td></tr>`;
+      }
+    }
+
+    function filtrarTabelaUsuarios() {
+      const termo = document.getElementById('input-filtro-usuario').value.toLowerCase().trim();
+      
+      if (!termo) {
+        listaUsuariosFiltrados = [...listaUsuariosGlobais];
+      } else {
+        listaUsuariosFiltrados = listaUsuariosGlobais.filter(u => {
+          const nome = (u.nome_completo || '').toLowerCase();
+          const email = (u.email || '').toLowerCase();
+          const razao = (u.empresas?.razao_social || '').toLowerCase();
+          return nome.includes(termo) || email.includes(termo) || razao.includes(termo);
+        });
+      }
+
+      paginaAtualUsuario = 1;
+      renderizarTabelaUsuariosComPaginacao();
+    }
+
+    function renderizarTabelaUsuariosComPaginacao() {
+      const corpo = document.getElementById('tabela-usuarios-corpo');
+      const totalItens = listaUsuariosFiltrados.length;
+      const totalPaginas = Math.ceil(totalItens / itensPorPaginaUsuario) || 1;
+
+      if (totalItens === 0) {
+        corpo.innerHTML = `<tr><td colSpan="6" class="py-8 text-center text-slate-400">Nenhum usuário localizado.</td></tr>`;
+        document.getElementById('info-paginacao-usuarios').textContent = `Exibindo 0-0 de 0 usuários`;
+        document.getElementById('label-pagina-atual').textContent = `Página 1`;
+        document.getElementById('btn-usr-prev').disabled = true;
+        document.getElementById('btn-usr-next').disabled = true;
+        return;
+      }
+
+      // Garante limite de página
+      if (paginaAtualUsuario > totalPaginas) paginaAtualUsuario = totalPaginas;
+
+      const inicio = (paginaAtualUsuario - 1) * itensPorPaginaUsuario;
+      const fim = Math.min(inicio + itensPorPaginaUsuario, totalItens);
+      const usuariosPagina = listaUsuariosFiltrados.slice(inicio, fim);
+
+      corpo.innerHTML = usuariosPagina.map((u) => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-3 px-4 font-bold text-slate-800">${u.nome_completo}</td>
+          <td class="py-3 px-4 text-xs text-slate-600">${u.email}</td>
+          <td class="py-3 px-4 text-xs">
+            <span class="font-bold text-slate-800 block">${u.empresas ? u.empresas.razao_social : 'Sem empresa'}</span>
+            <span class="text-slate-400">${u.empresas ? u.empresas.cnpj : '--'}</span>
+          </td>
+          <td class="py-3 px-4 text-center">
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded ${u.is_admin ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}">
+              ${u.is_admin ? 'ADMIN' : 'USUÁRIO'}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-center">
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded ${u.ativo ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
+              ${u.ativo ? 'ATIVO' : 'INATIVO'}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-center">
+            <div class="flex items-center justify-center gap-2">
+              <button onclick="abrirModalEdicaoUsuarioId('${u.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" title="Editar Usuário"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+              <button onclick="excluirUsuarioAdmin('${u.id}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg" title="Excluir Usuário"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      // Atualiza os controles de paginação
+      document.getElementById('info-paginacao-usuarios').textContent = `Exibindo ${inicio + 1}-${fim} de ${totalItens} usuários`;
+      document.getElementById('label-pagina-atual').textContent = `Página ${paginaAtualUsuario} de ${totalPaginas}`;
+      document.getElementById('btn-usr-prev').disabled = paginaAtualUsuario <= 1;
+      document.getElementById('btn-usr-next').disabled = paginaAtualUsuario >= totalPaginas;
+
+      lucide.createIcons();
+    }
+
+    function mudarPaginaUsuario(delta) {
+      paginaAtualUsuario += delta;
+      renderizarTabelaUsuariosComPaginacao();
+    }
+
+    // --- CADASTRO E EDIÇÃO DE USUÁRIO ---
+    function abrirModalNovoUsuario() {
+      document.getElementById('form-novo-usuario').reset();
+      document.getElementById('modal-novo-usuario').classList.remove('hidden');
+    }
+
+    async function salvarNovoUsuario(e) {
+      e.preventDefault();
+      const payload = {
+        razao_social: document.getElementById('add-usr-razao').value,
+        cnpj: document.getElementById('add-usr-cnpj').value,
+        nome_completo: document.getElementById('add-usr-nome').value,
+        email: document.getElementById('add-usr-email').value,
+        senha: document.getElementById('add-usr-senha').value,
+        is_admin: document.getElementById('add-usr-admin').checked
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/usuarios?admin_id=${usuarioAtual.user_id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          document.getElementById('modal-novo-usuario').classList.add('hidden');
+          await carregarUsuariosAdmin();
+          alert("Usuário e licença criados com sucesso!");
+        } else {
+          alert(data.detail || "Erro ao cadastrar usuário.");
+        }
+      } catch (e) {
+        alert("Erro na conexão com o servidor.");
+      }
+    }
+
+    function abrirModalEdicaoUsuarioId(id) {
+      const u = listaUsuariosGlobais.find(usr => usr.id === id);
+      if (!u) return;
+
+      document.getElementById('edit-usr-id').value = u.id;
+      document.getElementById('edit-usr-nome').value = u.nome_completo;
+      document.getElementById('edit-usr-email').value = u.email;
+      document.getElementById('edit-usr-senha').value = '';
+      document.getElementById('edit-usr-admin').checked = u.is_admin === true;
+      document.getElementById('edit-usr-ativo').checked = u.ativo === true;
+
+      document.getElementById('modal-editar-usuario').classList.remove('hidden');
+    }
+
+    async function salvarEdicaoUsuario(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-usr-id').value;
+
+      const payload = {
+        nome_completo: document.getElementById('edit-usr-nome').value,
+        email: document.getElementById('edit-usr-email').value,
+        senha: document.getElementById('edit-usr-senha').value,
+        is_admin: document.getElementById('edit-usr-admin').checked,
+        ativo: document.getElementById('edit-usr-ativo').checked
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/usuarios/${id}?admin_id=${usuarioAtual.user_id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          document.getElementById('modal-editar-usuario').classList.add('hidden');
+          await carregarUsuariosAdmin();
+        } else {
+          alert(data.detail || "Erro ao atualizar usuário.");
+        }
+      } catch (e) {
+        alert("Erro na conexão com o servidor.");
+      }
+    }
+
+    async function excluirUsuarioAdmin(id) {
+      if (!confirm("Tem certeza que deseja excluir este usuário definitivamente?")) return;
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/usuarios/${id}?admin_id=${usuarioAtual.user_id}`, { method: 'DELETE' });
+        if (res.ok) {
+          await carregarUsuariosAdmin();
+        } else {
+          const data = await res.json();
+          alert(data.detail || "Erro ao remover usuário.");
+        }
+      } catch (e) {
+        alert("Erro na conexão com o servidor.");
+      }
+    }
+
+    // --- ABA SINCRONIZAÇÃO PNCP ---
+    async function dispararSincronizacao() {
+      try {
+        const res = await fetch(`${API_URL}/api/admin/sincronizar?admin_id=${usuarioAtual.user_id}`, { method: 'POST' });
+        const data = await res.json();
+        alert(data.message || "Sincronização iniciada.");
+      } catch (e) {
+        alert("Erro ao disparar robô de sincronização.");
+      }
+    }
+
+    async function pararSincronizacao() {
+      try {
+        const res = await fetch(`${API_URL}/api/admin/parar-sincronizacao?admin_id=${usuarioAtual.user_id}`, { method: 'POST' });
+        const data = await res.json();
+        alert(data.message || "Solicitação de parada enviada.");
+      } catch (e) {
+        alert("Erro ao enviar solicitação de parada.");
+      }
+    }
+
+    checarSessaoAdmin();
     lucide.createIcons();
   </script>
 </body>
