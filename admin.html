@@ -46,7 +46,45 @@
       <div class="flex gap-4 items-center">
         <button onclick="syncStart()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-bold shadow flex gap-2 items-center"><i data-lucide="play" class="w-4 h-4"></i> Forçar Varredura</button>
         <button onclick="syncStop()" class="bg-red-100 hover:bg-red-200 text-red-700 px-5 py-2.5 rounded-lg font-bold flex gap-2 items-center"><i data-lucide="square" class="w-4 h-4"></i> Parar Sincronização</button>
+        <div class="mb-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold text-slate-800 block">Filtro de Portais para Varredura</span>
+          <span id="label-portais-varredura" class="text-xs text-blue-600 font-semibold">Qualquer Portal (Todos)</span>
+        </div>
+        <button onclick="toggleModalPortaisVarredura()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs flex items-center gap-2 transition-colors">
+          <i data-lucide="filter" class="w-4 h-4"></i> Selecionar Portais
+        </button>
       </div>
+      
+      </div>
+      !-- MODAL DE SELEÇÃO DE PORTAIS -->
+    <div id="modal-portais-varredura" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden border shadow-xl flex flex-col max-h-[85vh]">
+        <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+          <h3 class="font-bold text-sm">Portais para Varredura</h3>
+          <button onclick="toggleModalPortaisVarredura()"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        
+        <div class="p-4 border-b bg-slate-50 space-y-3">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+            <input type="text" id="input-filtra-portais-admin" onkeyup="filtrarPortaisAdmin()" placeholder="Pesquisar portal..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div class="flex justify-between items-center">
+            <label class="flex items-center gap-2 text-xs font-bold text-blue-700 cursor-pointer">
+              <input type="checkbox" id="chk-qualquer-portal-admin" onchange="marcarTodosPortaisAdmin()" class="rounded border-slate-300"> Qualquer Portal (Todos)
+            </label>
+            <span id="qtd-portais-admin" class="text-[10px] text-slate-500 font-bold">...</span>
+          </div>
+        </div>
+
+        <div class="p-4 space-y-1.5 overflow-y-auto flex-1" id="container-portais-admin-checks"></div>
+        
+        <div class="p-4 border-t bg-slate-50 text-right">
+          <button onclick="toggleModalPortaisVarredura()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow">Confirmar Seleção</button>
+        </div>
+      </div>
+    </div>
 
       <!-- STATUS VISUAL DA VARREDURA -->
       <div id="painel-progresso" class="hidden p-5 bg-slate-900 text-white rounded-2xl space-y-4 shadow-inner">
@@ -151,6 +189,99 @@
         }
       } catch(e) {}
     }, 2000);
+
+    let listaPortaisAdmin = [];
+
+    async function carregarPortaisAdmin() {
+      try {
+        const res = await fetch(`${API_URL}/api/licitacoes/portais`);
+        const data = await res.json();
+        listaPortaisAdmin = data.portais || ["Compras.gov.br", "PNCP", "Licitações-e", "BNC", "Licitanet", "BLL"];
+        document.getElementById('qtd-portais-admin').textContent = `${listaPortaisAdmin.length} portais`;
+        renderizarChecksPortaisAdmin(listaPortaisAdmin);
+      } catch (e) {
+        listaPortaisAdmin = ["Compras.gov.br", "PNCP", "Licitações-e", "BNC", "Licitanet", "BLL"];
+        renderizarChecksPortaisAdmin(listaPortaisAdmin);
+      }
+    }
+
+    function renderizarChecksPortaisAdmin(portais) {
+      const container = document.getElementById('container-portais-admin-checks');
+      const selecionados = Array.from(document.querySelectorAll('.chk-portal-admin:checked')).map(cb => cb.value);
+
+      container.innerHTML = portais.map(p => {
+        const checked = selecionados.includes(p) ? 'checked' : '';
+        return `
+          <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 p-2 rounded-lg cursor-pointer transition-colors">
+            <input type="checkbox" value="${p}" ${checked} class="chk-portal-admin rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="atualizarTextoPortaisAdmin()"> 
+            <span class="truncate">${p}</span>
+          </label>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function filtrarPortaisAdmin() {
+      const termo = document.getElementById('input-filtra-portais-admin').value.toLowerCase();
+      const filtrados = listaPortaisAdmin.filter(p => p.toLowerCase().includes(termo));
+      renderizarChecksPortaisAdmin(filtrados);
+    }
+
+    function marcarTodosPortaisAdmin() {
+      document.querySelectorAll('.chk-portal-admin').forEach(cb => cb.checked = false);
+      atualizarTextoPortaisAdmin();
+    }
+
+    function atualizarTextoPortaisAdmin() {
+      const sels = Array.from(document.querySelectorAll('.chk-portal-admin:checked')).map(cb => cb.value);
+      const chkQualquer = document.getElementById('chk-qualquer-portal-admin');
+      const label = document.getElementById('label-portais-varredura');
+
+      if (sels.length > 0) {
+        chkQualquer.checked = false;
+        label.textContent = `${sels.length} Portal(is) selecionado(s): ${sels.slice(0, 2).join(', ')}${sels.length > 2 ? '...' : ''}`;
+      } else {
+        chkQualquer.checked = true;
+        label.textContent = "Qualquer Portal (Todos)";
+      }
+    }
+
+    function toggleModalPortaisVarredura() {
+      document.getElementById('modal-portais-varredura').classList.toggle('hidden');
+    }
+
+    // FUNÇÃO DE DISPARAR A VARREDURA COM OS PORTAIS SELECIONADOS
+    async function forcarSincronizacao() {
+      const adminId = obterAdminIdLocal();
+      const portaisSelecionados = Array.from(document.querySelectorAll('.chk-portal-admin:checked')).map(cb => cb.value);
+      
+      const payload = {
+        dias: 2,
+        portais: portaisSelecionados
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/sincronizar?admin_id=${adminId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        const data = await res.json();
+        if (res.ok) {
+          alert("Varredura iniciada com sucesso!");
+        } else {
+          alert(data.detail || "Erro ao iniciar sincronização.");
+        }
+      } catch (e) {
+        alert("Erro de conexão com o servidor.");
+      }
+    }
+
+    // Inicializa a lista de portais ao carregar o admin.html
+    document.addEventListener('DOMContentLoaded', carregarPortaisAdmin);
+
+
 
     async function loadAg() {
       const r = await fetch(`${API}/api/admin/agendamento?admin_id=${user.user_id}`); const d = await r.json();
