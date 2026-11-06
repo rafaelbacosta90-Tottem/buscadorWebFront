@@ -250,33 +250,34 @@
       document.getElementById('modal-portais-varredura').classList.toggle('hidden');
     }
 
-    // FUNÇÃO DE DISPARAR A VARREDURA COM OS PORTAIS SELECIONADOS
     async function forcarSincronizacao() {
-      const adminId = obterAdminIdLocal();
-      const portaisSelecionados = Array.from(document.querySelectorAll('.chk-portal-admin:checked')).map(cb => cb.value);
-      
-      const payload = {
-        dias: 2,
-        portais: portaisSelecionados
-      };
+  const adminId = obterAdminIdLocal();
+  const portaisSelecionados = Array.from(document.querySelectorAll('.chk-portal-admin:checked')).map(cb => cb.value);
+  
+  const payload = {
+    dias: 2,
+    portais: portaisSelecionados || []
+  };
 
-      try {
-        const res = await fetch(`${API_URL}/api/admin/sincronizar?admin_id=${adminId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        
-        const data = await res.json();
-        if (res.ok) {
-          alert("Varredura iniciada com sucesso!");
-        } else {
-          alert(data.detail || "Erro ao iniciar sincronização.");
-        }
-      } catch (e) {
-        alert("Erro de conexão com o servidor.");
-      }
+  try {
+    const res = await fetch(`${API_URL}/api/admin/sincronizar?admin_id=${adminId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    const data = await res.json();
+    if (res.ok) {
+      alert("Varredura iniciada com sucesso!");
+    } else {
+      alert(data.detail || data.message || "Erro ao iniciar sincronização.");
     }
+  } catch (e) {
+    alert("Erro de conexão com o servidor.");
+  }
+}
 
     // Inicializa a lista de portais ao carregar o admin.html
     document.addEventListener('DOMContentLoaded', carregarPortaisAdmin);
